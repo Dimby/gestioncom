@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin - Historique des imports/exports</title>
+  <link rel="stylesheet" href="/assets/css/assets.css">
+  <link rel="stylesheet" href="/assets/css/uiv2.css">
+  <link rel="stylesheet" href="/assets/css/historyImport.css">
+</head>
+<body>
+  <div class="root-v2">
+    <nav id="nav-v2"></nav>
+
+    <div class="main-content" style="justify-content: flex-start; gap: 20px">
+      <div class="titre">
+        <h1>Historique des imports/exports de la base</h1>
+        <input type="text" id="searchInput" placeholder="Recherche action/source/utilisateur...">
+      </div>
+
+      <div class="filters">
+        <div>
+          <input type="date" id="minDate" placeholder="Date min">
+          <input type="date" id="maxDate" placeholder="Date max">
+        </div>
+        <button id="resetFilters">Réinitialiser</button>
+      </div>
+      <table border="1">
+        <thead>
+          <tr>
+            <th>Action</th>
+            <th>Source</th>
+            <th>Utilisateur</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="historyImportBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+let historyData = [];
+
+function renderTable() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const minDate = document.getElementById('minDate').value;
+  const maxDate = document.getElementById('maxDate').value;
+  const body = document.getElementById('historyImportBody');
+  body.innerHTML = "";
+
+  historyData
+    .filter(entry => {
+      // Recherche texte
+      if (
+        search &&
+        !(
+          (entry.action || "").toLowerCase().includes(search) ||
+          (entry.source || "").toLowerCase().includes(search) ||
+          (entry.user || "").toLowerCase().includes(search)
+        )
+      ) return false;
+      // Plage de date
+      if (minDate && entry.date < minDate) return false;
+      if (maxDate && entry.date > maxDate + "T23:59:59") return false;
+      return true;
+    })
+    .reverse()
+    .forEach(entry => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${entry.action}</td>
+        <td>${entry.source}</td>
+        <td>${entry.user}</td>
+        <td>${new Date(entry.date).toLocaleString('fr-FR')}</td>
+      `;
+      body.appendChild(tr);
+    });
+}
+
+fetch('/api/history-import')
+  .then(res => res.json())
+  .then(data => {
+    historyData = data;
+    renderTable();
+  });
+
+["searchInput", "minDate", "maxDate"].forEach(id => {
+  document.getElementById(id).addEventListener("input", renderTable);
+  document.getElementById(id).addEventListener("change", renderTable);
+});
+document.getElementById("resetFilters").addEventListener("click", () => {
+  document.getElementById("searchInput").value = "";
+  document.getElementById("minDate").value = "";
+  document.getElementById("maxDate").value = "";
+  renderTable();
+});
+  </script>
+  <script src="/assets/js/nav-active.js"></script>
+  <script type="module" src="/assets/js/admin/admin.js"></script>
+  <script src="/assets/js/admin/nav.js"></script>
+</body>
+</html>

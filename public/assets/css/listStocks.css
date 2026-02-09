@@ -1,0 +1,22 @@
+.filter-options #minPrice, #maxPrice, #minStock, #maxStock, #soldOrder {
+    width: 100px !important;
+}
+
+#editModal h3 {
+    margin: 0;
+}
+
+#editForm {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+button#cancelEdit {
+    background-color:#575858;
+    color: white;
+}
+
+.main-content {
+    padding: 20px;
+}

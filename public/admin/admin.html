@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin - Gestion Commerciale</title>
+  <link rel="stylesheet" href="/assets/css/assets.css">
+  <link rel="stylesheet" href="/assets/css/admin.css">
+  <link rel="stylesheet" href="/assets/css/uiv2.css">
+  <link rel="stylesheet" href="/assets/select2/css/select2.min.css">
+</head>
+<body>
+  <div class="root-v2">
+    <nav id="nav-v2"></nav>
+  
+    <div class="main-content">
+      <div class="root" style="display: flex;">
+        <div class="container" style="flex: 1;">
+          <h2>Ajouter un nouveau produit</h2>
+        
+          <form id="stockForm">
+            <select name="produits" id="produits" class="js-example-basic-single" style="width:100%;">
+                <option value="">Sélectionner un produit</option>
+            </select>
+            <input type="number" id="prix" placeholder="Prix d'achat" required min="0">
+            <input type="number" id="salePrice" placeholder="Prix de vente" required min="0">
+            <input type="number" id="stock" placeholder="Stock à ajouter" required min="1">
+            <button type="submit">Ajouter au stock</button>
+          </form>
+        </div>
+    
+        <div class="service-section">
+          <h2>Enregistrer un service</h2>
+          <form id="serviceForm">
+            <h3>Nom du service</h3>
+            <input type="text" id="serviceName" required placeholder="Nom du service">
+    
+            <h3>Produit utilisé</h3>
+            <select id="serviceProduit" name="serviceProduit" style="width:100%;">
+              <option value="">Sélectionner un produit</option>
+            </select>
+
+            <h3>Prix de service</h3>
+            <input type="number" id="servicePrice" placeholder="10.000">
+
+            <h3>Information utile (facultatif)</h3>
+            <input type="text" id="serviceInfo" placeholder="Informations supplémentaires">
+    
+            <button type="submit">Enregistrer le service</button>
+          </form>
+        </div>
+      </div>
+    
+      <!-- <section class="import-section">
+        <h2>Importer une base de données</h2>
+        <form id="importForm">
+            <input type="file" id="dbFile" accept=".json" required>
+            <button type="submit">Importer</button>
+        </form>
+      </section> -->
+    </div>
+  </div>
+
+  <script src="/assets/js/nav-active.js"></script>
+  <script src="/assets/select2/js/jquery.js"></script>
+  <script src="/assets/select2/js/select2.min.js"></script>
+  <script type="module" src="/assets/js/admin/admin.js"></script>
+  <script src="/assets/js/admin/nav.js"></script>
+
+<script>
+  $(document).ready(function() {
+      $('#produits').select2({
+          placeholder: "Sélectionner un produit"
+      });
+  });
+</script>
+</body>
+</html>

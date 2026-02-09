@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin - Liste des Stocks</title>
+  <link rel="stylesheet" href="/assets/css/assets.css">
+  <link rel="stylesheet" href="/assets/css/uiv2.css">
+  <link rel="stylesheet" href="/assets/css/listStocks.css">
+</head>
+<body>
+  <div class="root-v2">
+    <nav id="nav-v2"></nav>
+
+    <div class="main-content" style="justify-content: flex-start; gap: 20px">
+      <div class="titre">
+        <h1>Liste des Stocks</h1>
+        <input type="text" id="searchInput" placeholder="Recherche produit/catégorie...">
+      </div>
+
+      <div class="filters">
+        <div class="filter-options" style="display: flex; gap: 10px">
+          <select id="categoryFilter">
+              <option value="">Toutes catégories</option>
+          </select>
+          
+          <!-- Nouveau sélecteur de tri -->
+          <select id="sortOrder">
+            <option value="soldDesc">Vendus ↓</option>
+            <option value="soldAsc">Vendus ↑</option>
+            <option value="nameAsc">Nom (A-Z)</option>
+            <option value="nameDesc">Nom (Z-A)</option>
+          </select>
+          
+          <input type="date" id="minDate" placeholder="Date min">
+          <input type="date" id="maxDate" placeholder="Date max">
+
+          <div style="display: flex; align-items: center; gap: 5px; margin-left: 15px;">
+            <label for="lowStockSwitch">Stock ≤ 5</label>
+            <label class="switch">
+                <input type="checkbox" id="lowStockSwitch">
+                <span class="slider round"></span>
+            </label>
+          </div>
+        </div>
+        <button id="resetFilters">Réinitialiser</button>
+      </div>
+      <div id="stocks"></div>
+    </div>
+  </div>
+
+  <script type="module" src="/assets/js/admin/listStocks.js"></script>
+  <script src="/assets/js/nav-active.js"></script>
+  <script src="/assets/js/admin/nav.js"></script>
+</body>
+</html>

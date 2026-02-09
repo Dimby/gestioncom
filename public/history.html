@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="assets/css/assets.css">
+    <link rel="stylesheet" href="assets/css/uiv2.css">
+    <link rel="stylesheet" href="assets/select2/css/select2.min.css">
+    <title>Gestion de vente - Historique des ventes</title>
+</head>
+<body>
+    <div class="root-v2">
+        <nav id="nav-v2">
+           <div class="nav-links">
+                <a href="/" class="nav-link"><svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="currentColor"  class="icon icon-tabler icons-tabler-filled icon-tabler-square-rounded-plus"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 2l.324 .001l.318 .004l.616 .017l.299 .013l.579 .034l.553 .046c4.785 .464 6.732 2.411 7.196 7.196l.046 .553l.034 .579c.005 .098 .01 .198 .013 .299l.017 .616l.005 .642l-.005 .642l-.017 .616l-.013 .299l-.034 .579l-.046 .553c-.464 4.785 -2.411 6.732 -7.196 7.196l-.553 .046l-.579 .034c-.098 .005 -.198 .01 -.299 .013l-.616 .017l-.642 .005l-.642 -.005l-.616 -.017l-.299 -.013l-.579 -.034l-.553 -.046c-4.785 -.464 -6.732 -2.411 -7.196 -7.196l-.046 -.553l-.034 -.579a28.058 28.058 0 0 1 -.013 -.299l-.017 -.616c-.003 -.21 -.005 -.424 -.005 -.642l.001 -.324l.004 -.318l.017 -.616l.013 -.299l.034 -.579l.046 -.553c.464 -4.785 2.411 -6.732 7.196 -7.196l.553 -.046l.579 -.034c.098 -.005 .198 -.01 .299 -.013l.616 -.017c.21 -.003 .424 -.005 .642 -.005zm0 6a1 1 0 0 0 -1 1v2h-2l-.117 .007a1 1 0 0 0 .117 1.993h2v2l.007 .117a1 1 0 0 0 1.993 -.117v-2h2l.117 -.007a1 1 0 0 0 -.117 -1.993h-2v-2l-.007 -.117a1 1 0 0 0 -.993 -.883z" fill="currentColor" stroke-width="0" /></svg> Ajout vente</a>
+                <a href="/history" class="nav-link"><svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-building-store"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 21l18 0" /><path d="M3 7v1a3 3 0 0 0 6 0v-1m0 1a3 3 0 0 0 6 0v-1m0 1a3 3 0 0 0 6 0v-1h-18l2 -4h14l2 4" /><path d="M5 21l0 -10.15" /><path d="M19 21l0 -10.15" /><path d="M9 21v-4a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v4" /></svg> Historique des ventes</a>
+                <a href="/bestsellers" class="nav-link"><svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-shopping-cart-star"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 19a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M9.5 17h-3.5v-14h-2" /><path d="M6 5l14 1l-.615 4.302m-6.885 2.698h-6.5" /><path d="M17.8 20.817l-2.172 1.138a.392 .392 0 0 1 -.568 -.41l.415 -2.411l-1.757 -1.707a.389 .389 0 0 1 .217 -.665l2.428 -.352l1.086 -2.193a.392 .392 0 0 1 .702 0l1.086 2.193l2.428 .352a.39 .39 0 0 1 .217 .665l-1.757 1.707l.414 2.41a.39 .39 0 0 1 -.567 .411l-2.172 -1.138z" /></svg> Les meilleurs ventes</a>
+                <a href="/import" class="nav-link"><svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-database-import"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 6c0 1.657 3.582 3 8 3s8 -1.343 8 -3s-3.582 -3 -8 -3s-8 1.343 -8 3" /><path d="M4 6v6c0 1.657 3.582 3 8 3c.856 0 1.68 -.05 2.454 -.144m5.546 -2.856v-6" /><path d="M4 12v6c0 1.657 3.582 3 8 3c.171 0 .341 -.002 .51 -.006" /><path d="M19 22v-6" /><path d="M22 19l-3 -3l-3 3" /></svg> Importer/Exporter</a>
+            </div>
+        </nav>
+
+        <div class="main-content" style="justify-content: flex-start; gap: 20px; padding-bottom: 20px;">
+            <div class="rootVente">
+                <div class="header" style="display:flex;justify-content:space-between;align-items:center;padding: 0 10px !important">
+                    
+                    <div class="date-controls" style="display: flex; gap: 20px;">
+                        <div id="dayNavigator" style="display: flex; align-items: center; gap: 10px;">
+                            <button id="prevDayBtn">&lt;</button>
+                            <span id="currentDateDisplay" style="font-weight: bold; min-width: 50px; text-align: center;"></span>
+                            <button id="nextDayBtn">&gt;</button>
+                        </div>
+
+                        <div id="todayFilter" style="display: flex; align-items: center; gap: 10px;">
+                            <span>Aujourd'hui</span>
+                            <label class="switch">
+                                <input type="checkbox" id="todayFilterSwitch" checked>
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <div style="font-weight:bold;color:#1a7f37;">P</div>
+                            <div>+</div>
+                            <div style="font-weight:bold;color:#1a7f37;">S</div>
+                            <div>-</div>
+                            <div style="font-weight:bold;color:#1a7f37;">M</div>
+                            <div>=</div>
+                            <div style="font-weight:bold;color:#1a7f37;">T</div>
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <div id="recetteProduit" style="font-weight:bold;color:#1a7f37;"></div>
+                            <div>+</div>
+                            <div id="recetteService" style="font-weight:bold;color:#1a7f37;"></div>
+                            <div>-</div>
+                            <div id="recetteMovement" style="font-weight:bold;color:#1a7f37;">- 21000 Ar</div>
+                            <div>=</div>
+                            <div id="totalRecette" style="font-weight:bold;color:#3893db;"></div>
+                        </div>
+                    </div>
+                </div>
+                <ul class="nav nav-tabs" id="venteTabs" style="margin-bottom: 20px; border-bottom: 1px solid #ddd;">
+                    <li class="nav-item" style="display:inline-block;">
+                        <a class="nav-link active" id="tabProduit" href="#" style="padding: 10px 20px; border: 1px solid #ddd; border-bottom: none; background: #fff;">Produits</a>
+                    </li>
+                    <li class="nav-item" style="display:inline-block;">
+                        <a class="nav-link" id="tabService" href="#" style="padding: 10px 20px; border: 1px solid #ddd; border-bottom: none; background: #f9f9f9;">Services</a>
+                    </li>
+                    <li class="nav-item" style="display:inline-block;">
+                        <a class="nav-link" id="tabMouvements" href="#" style="padding: 10px 20px; border: 1px solid #ddd; border-bottom: none; background: #f9f9f9;">Mouvements</a>
+                    </li>
+                </ul>
+                <div class="sectionVenteProduit" id="tabContentProduit">
+                    <div class="titre" style="display:flex;align-items:center;gap:30px;">
+                        <h2 style="margin: 0;">Vente des produits</h2>
+                        <input type="text" id="searchInput" placeholder="Recherche produit/catégorie...">
+                    </div>
+                
+                    <div class="filters">
+                        <div class="filter-options">
+                            <select id="categoryFilter">
+                                <option value="">Toutes catégories</option>
+                            </select>
+                            <select id="stockFilter">
+                                <option value="">Tous stocks</option>
+                                <option value="negative">Stock négatif</option>
+                                <option value="less">Stock < 5</option>
+                                <option value="more">Stock ≥ 5</option>
+                            </select>
+                            <input type="number" id="minPrice" placeholder="Prix min" style="width:80px;">
+                            <input type="number" id="maxPrice" placeholder="Prix max" style="width:80px;">
+                            <select id="paymentFilter">
+                                <option value="">Tous paiements</option>
+                                <option value="cash">Cash</option>
+                                <option value="mobile money">Mobile Money</option>
+                            </select>
+                        </div>
+                        <button id="resetFilters">Réinitialiser filtre</button>
+                    </div>
+                
+                    <table id="salesTable" border="1">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Produit</th>
+                                <th>Catégorie</th>
+                                <th>Paiement</th>
+                                <th>Quantité</th>
+                                <th>Prix unitaire</th>
+                                <th>Prix</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            </tbody>
+                    </table>
+                    <div id="paginationNav"></div>
+                </div>
+                <div class="sectionVenteService" id="tabContentService" style="display:none;">
+                    <div class="titre" style="display:flex;align-items:center;gap:30px;">
+                        <h2 style="margin: 0;">Vente des services</h2>
+                        <input type="text" id="searchServiceInput" placeholder="Recherche service/produit...">
+                    </div>
+                    <div class="filters">
+                        <div class="filter-options">
+                            <select id="serviceStockFilter">
+                                <option value="">Tous stocks</option>
+                                <option value="negative">Stock négatif</option>
+                                <option value="less">Stock < 5</option>
+                                <option value="more">Stock ≥ 5</option>
+                            </select>
+                            <input type="number" id="serviceMinPrice" placeholder="Prix min" style="width:80px;">
+                            <input type="number" id="serviceMaxPrice" placeholder="Prix max" style="width:80px;">
+                            <select id="servicePaymentFilter">
+                                <option value="">Tous paiements</option>
+                                <option value="cash">Cash</option>
+                                <option value="mobile money">Mobile Money</option>
+                            </select>
+                        </div>
+                        <button id="resetServiceFilters">Réinitialiser filtre</button>
+                    </div>
+                    <table id="salesServiceTable" border="1">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Nom du service</th>
+                                <th>Catégorie</th>
+                                <th>Produit</th>
+                                <th>Paiement</th>
+                                <th>Quantité</th>
+                                <th>Prix unitaire</th>
+                                <th>Prix</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            </tbody>
+                    </table>
+                    <div id="paginationServiceNav"></div>
+                </div>
+                <div class="sectionMouvements" id="tabContentMouvements" style="display:none;">
+                    <div class="titre" style="display:flex;align-items:center;gap:30px;">
+                        <h2 style="margin: 0;">Mouvements financiers</h2>
+                        <input type="text" id="searchMouvementInput" placeholder="Rechercher description...">
+                    </div>
+                    
+                    <div class="filters">
+                        <div class="filter-options">
+                            <select id="typeMovementFilter">
+                                <option value="">Tous types</option>
+                                <option value="spent">Dépenses</option>
+                                <option value="disburse">Décaissements</option>
+                            </select>
+                            <input type="number" id="minPriceMouvement" placeholder="Montant min" style="width:100px;">
+                            <input type="number" id="maxPriceMouvement" placeholder="Montant max" style="width:100px;">
+                        </div>
+                        <button id="resetMouvementFilters">Réinitialiser filtre</button>
+                    </div>
+                    
+                    <table id="mouvementsTable" border="1">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                                <th>Montant</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            </tbody>
+                    </table>
+                    <div id="paginationMouvementNav"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/assets/js/nav-active.js"></script>
+    <script src="assets/select2/js/jquery.js"></script>
+    <script src="assets/select2/js/select2.min.js"></script>
+    <script type="module" src="assets/js/history.js"></script>
+</body>
+</html>

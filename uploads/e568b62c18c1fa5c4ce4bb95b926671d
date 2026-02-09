@@ -1,0 +1,143 @@
+{
+  "items": [],
+  "sales": [
+    {
+      "produit": "Souris Logitech M185",
+      "categorie": "Souris",
+      "quantity": 2,
+      "price": 35000,
+      "payment": "cash"
+    },
+    {
+      "produit": "Webcam Logitech C270",
+      "categorie": "Webcam",
+      "quantity": 5,
+      "price": 257000,
+      "payment": "cash",
+      "date": "2025-08-12T10:06:23.862Z"
+    },
+    {
+      "produit": "Souris Logitech M185",
+      "categorie": "Souris",
+      "quantity": 1,
+      "price": 35000,
+      "payment": "cash",
+      "date": "2025-08-12T11:44:14.864Z"
+    }
+  ],
+  "stocks": [
+    {
+      "id": 1754987603317,
+      "name": "Souris Logitech M185",
+      "category": "Souris",
+      "price": 35000,
+      "stock": 19,
+      "sold": 1,
+      "history": [
+        {
+          "date": "2025-08-12T11:44:14.864Z",
+          "change": -1,
+          "stockAfter": 20,
+          "note": "Vente"
+        }
+      ]
+    },
+    {
+      "id": 1754987603318,
+      "name": "Clavier mécanique Redragon K552",
+      "category": "Clavier",
+      "price": 150000,
+      "stock": 55,
+      "sold": 0,
+      "history": [
+        {
+          "date": "2025-08-12T09:11:49.462Z",
+          "change": 28,
+          "stockAfter": 40,
+          "note": "Réception fournisseur"
+        },
+        {
+          "date": "2025-08-12T09:16:26.833Z",
+          "change": 11,
+          "stockAfter": 40,
+          "note": "Réception fournisseur"
+        },
+        {
+          "date": "2025-08-12T09:17:12.374Z",
+          "change": 4,
+          "stockAfter": 51,
+          "note": "Réception fournisseur"
+        }
+      ]
+    },
+    {
+      "id": 1754987603319,
+      "name": "Webcam Logitech C270",
+      "category": "Webcam",
+      "price": 257000,
+      "stock": 33,
+      "sold": 7,
+      "history": [
+        {
+          "date": "2025-08-12T09:11:04.196Z",
+          "change": 12,
+          "stockAfter": 32,
+          "note": "Réception fournisseur"
+        },
+        {
+          "date": "2025-08-12T09:17:48.371Z",
+          "change": 3,
+          "stockAfter": 32,
+          "note": "Réception fournisseur"
+        },
+        {
+          "date": "2025-08-12T09:29:33.505Z",
+          "change": 5,
+          "stockAfter": 35,
+          "note": "Réception fournisseur + changement de prix",
+          "priceChange": {
+            "oldPrice": 250000,
+            "newPrice": 257000
+          }
+        },
+        {
+          "date": "2025-08-12T09:44:03.705Z",
+          "change": -2,
+          "stockAfter": 40,
+          "note": "Vente"
+        },
+        {
+          "date": "2025-08-12T10:06:23.862Z",
+          "change": -5,
+          "stockAfter": 38,
+          "note": "Vente"
+        }
+      ]
+    },
+    {
+      "id": 1754987603320,
+      "name": "Boitier Samsung 4A",
+      "category": "Boitier",
+      "price": 50000,
+      "stock": 20,
+      "sold": 0,
+      "history": [
+        {
+          "date": "2025-08-12T11:45:42.084Z",
+          "change": 20,
+          "stockAfter": 20,
+          "note": "Création produit"
+        }
+      ]
+    }
+  ],
+  "historyImport": [
+    {
+      "action": "export",
+      "source": "front",
+      "user": "inconnu",
+      "date": "2025-08-12T15:42:52.533Z"
+    }
+  ],
+  "signature": "da3113327f574f2df920e531da2e710d3df9f52199ca94174c9d55690fdd509b"
+}

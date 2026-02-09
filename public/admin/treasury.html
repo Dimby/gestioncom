@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Trésorerie - Gestion Commerciale</title>
+  <link rel="stylesheet" href="/assets/css/assets.css">
+  <link rel="stylesheet" href="/assets/css/uiv2.css">
+  <link rel="stylesheet" href="/assets/css/treasury.css">
+</head>
+<body>
+  <div class="root-v2">
+    <nav id="nav-v2"></nav>
+
+    <div class="main-content" style="justify-content: flex-start; gap: 20px">
+      <div class="titre">
+        <h1 id="treasuryDateTitle">Trésorerie</h1>
+        <div class="actions">
+          <div class="month-navigation">
+            <button id="prevMonth" class="month-nav-btn">&lt;</button>
+            <span id="currentMonthDisplay"></span>
+            <button id="nextMonth" class="month-nav-btn">&gt;</button>
+          </div>
+          <select id="weekSelector" class="week-selector">
+            <!-- Options seront générées dynamiquement en JavaScript -->
+          </select>
+          <div class="recap-filter" style="display:flex; align-items:center; margin-left:20px;">
+            <label class="switch">
+              <input type="checkbox" id="recapSwitch">
+              <span class="slider round"></span>
+            </label>
+            <span style="margin-left:10px;">Récapitulation</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="container">
+        <!-- Tableau détaillé journalier (existant) -->
+        <div id="detailedView">
+          <table id="treasuryTable">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Report</th>
+                <th>Recettes</th>
+                <th>Dépenses</th>
+                <th>Solde</th>
+                <th>Décaissement</th>
+                <th>Solde Final</th>
+              </tr>
+            </thead>
+            <tbody id="treasuryTableBody">
+              <!-- Les données seront générées dynamiquement ici -->
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Nouveau tableau récapitulatif par semaine -->
+        <div id="summaryView" style="display:none;">
+          <table id="treasurySummaryTable">
+            <thead>
+              <tr>
+                <th>Semaine</th>
+                <th>Report</th>
+                <th>Recettes</th>
+                <th>Dépenses</th>
+                <th>Décaissements</th>
+                <th>Solde</th>
+              </tr>
+            </thead>
+            <tbody id="treasurySummaryTableBody">
+              <!-- Les données de récapitulation seront générées dynamiquement -->
+            </tbody>
+            <tfoot>
+              <tr>
+                <td>Total</td>
+                <td>-</td>
+                <td id="totalRecapRecettes">0 Ar</td>
+                <td id="totalRecapDepenses">0 Ar</td>
+                <td id="totalRecapDecaissements">0 Ar</td>
+                <td id="totalRecapSolde">0 Ar</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/assets/js/nav-active.js"></script>
+  <script src="/assets/js/admin/nav.js"></script>
+  <script src="/assets/js/admin/treasury.js"></script>
+</body>
+</html>

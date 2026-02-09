@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestion de vente - Ajout Vente</title>
+    <link rel="stylesheet" href="assets/css/assets.css">
+    <link rel="stylesheet" href="assets/css/uiv2.css">
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/select2/css/select2.min.css">
+</head>
+<body>
+    <div class="root-v2">
+        <nav id="nav-v2">
+            <div class="nav-links">
+                <a href="/" class="nav-link"><svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="currentColor"  class="icon icon-tabler icons-tabler-filled icon-tabler-square-rounded-plus"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 2l.324 .001l.318 .004l.616 .017l.299 .013l.579 .034l.553 .046c4.785 .464 6.732 2.411 7.196 7.196l.046 .553l.034 .579c.005 .098 .01 .198 .013 .299l.017 .616l.005 .642l-.005 .642l-.017 .616l-.013 .299l-.034 .579l-.046 .553c-.464 4.785 -2.411 6.732 -7.196 7.196l-.553 .046l-.579 .034c-.098 .005 -.198 .01 -.299 .013l-.616 .017l-.642 .005l-.642 -.005l-.616 -.017l-.299 -.013l-.579 -.034l-.553 -.046c-4.785 -.464 -6.732 -2.411 -7.196 -7.196l-.046 -.553l-.034 -.579a28.058 28.058 0 0 1 -.013 -.299l-.017 -.616c-.003 -.21 -.005 -.424 -.005 -.642l.001 -.324l.004 -.318l.017 -.616l.013 -.299l.034 -.579l.046 -.553c.464 -4.785 2.411 -6.732 7.196 -7.196l.553 -.046l.579 -.034c.098 -.005 .198 -.01 .299 -.013l.616 -.017c.21 -.003 .424 -.005 .642 -.005zm0 6a1 1 0 0 0 -1 1v2h-2l-.117 .007a1 1 0 0 0 .117 1.993h2v2l.007 .117a1 1 0 0 0 1.993 -.117v-2h2l.117 -.007a1 1 0 0 0 -.117 -1.993h-2v-2l-.007 -.117a1 1 0 0 0 -.993 -.883z" fill="currentColor" stroke-width="0" /></svg> Ajout vente</a>
+                <a href="/history" class="nav-link"><svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-building-store"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 21l18 0" /><path d="M3 7v1a3 3 0 0 0 6 0v-1m0 1a3 3 0 0 0 6 0v-1m0 1a3 3 0 0 0 6 0v-1h-18l2 -4h14l2 4" /><path d="M5 21l0 -10.15" /><path d="M19 21l0 -10.15" /><path d="M9 21v-4a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v4" /></svg> Historique des ventes</a>
+                <a href="/bestsellers" class="nav-link"><svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-shopping-cart-star"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 19a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M9.5 17h-3.5v-14h-2" /><path d="M6 5l14 1l-.615 4.302m-6.885 2.698h-6.5" /><path d="M17.8 20.817l-2.172 1.138a.392 .392 0 0 1 -.568 -.41l.415 -2.411l-1.757 -1.707a.389 .389 0 0 1 .217 -.665l2.428 -.352l1.086 -2.193a.392 .392 0 0 1 .702 0l1.086 2.193l2.428 .352a.39 .39 0 0 1 .217 .665l-1.757 1.707l.414 2.41a.39 .39 0 0 1 -.567 .411l-2.172 -1.138z" /></svg> Les meilleurs ventes</a>
+                <a href="/import" class="nav-link"><svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-database-import"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 6c0 1.657 3.582 3 8 3s8 -1.343 8 -3s-3.582 -3 -8 -3s-8 1.343 -8 3" /><path d="M4 6v6c0 1.657 3.582 3 8 3c.856 0 1.68 -.05 2.454 -.144m5.546 -2.856v-6" /><path d="M4 12v6c0 1.657 3.582 3 8 3c.171 0 .341 -.002 .51 -.006" /><path d="M19 22v-6" /><path d="M22 19l-3 -3l-3 3" /></svg> Importer/Exporter</a>
+            </div>
+        </nav>
+
+        <div class="main-content" style="justify-content: flex-start; gap: 20px; padding-bottom: 20px;">
+            <div class="container" style="height: 100%">
+                <!-- Nav tabs Bootstrap style -->
+                <ul class="nav nav-tabs" id="venteTabs" style="margin-bottom: 20px; border-bottom: 1px solid #ddd;">
+                    <li class="nav-item" style="display:inline-block;">
+                        <a class="nav-link active" id="tabService" href="#" style="padding: 10px 20px; border: 1px solid #ddd; border-bottom: none; background: #fff;">Services</a>
+                    </li>
+                    <li class="nav-item" style="display:inline-block;">
+                        <a class="nav-link" id="tabProduit" href="#" style="padding: 10px 20px; border: 1px solid #ddd; border-bottom: none; background: #f9f9f9;">Produits</a>
+                    </li>
+                    <li class="nav-item" style="display:inline-block;">
+                        <a class="nav-link" id="tabExpenses" href="#" style="padding: 10px 20px; border: 1px solid #ddd; border-bottom: none; background: #f9f9f9;">Mouvements</a>
+                    </li>
+                </ul>
+                <!-- Contenu des tabs -->
+                
+                <div id="tabContentService">
+                    <div class="form-section">
+                        <h2 class="title">Votre vente de service d'aujourd'hui</h2>
+                        <form id="serviceSaleForm">
+                            <div class="form-group-01">
+                                <select id="serviceSelect" class="js-example-basic-single" required>
+                                    <option value="">Sélectionner un service</option>
+                                </select>
+                            </div>
+                            <div class="form-group-02">
+                                <input type="date" id="serviceDate" required style="margin-bottom: 10px; width: 100%; box-sizing: border-box; padding: 10px;">
+                                <input type="number" id="serviceQuantity" min="1" value="1" required placeholder="Quantité">
+                                <input type="number" id="servicePrice" required placeholder="Prix du service">
+                                <select id="servicePayment" required>
+                                    <option value="">Mode de paiement</option>
+                                    <option value="cash" selected>Cash</option>
+                                    <option value="mobile money">Mobile Money</option>
+                                </select>
+                            </div>
+                            <div style="text-align: center;">
+                                <button type="submit">Ajouter</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="tabContentProduit" style="display:none;">
+                    <div class="form-section">
+                        <h2 class="title">Votre vente de produit d'aujourd'hui</h2>
+                        <div class="forms">
+                            <form id="itemForm">
+                                <select name="produits" id="produits" class="js-example-basic-single">
+                                    <option value="">Sélectionner un produit</option>
+                                </select>
+                                <div class="item-details">
+                                    <input type="date" id="productDate" required style="margin-bottom: 10px; width: 100%; box-sizing: border-box; padding: 10px;">
+                                    <input type="number" id="quantity" placeholder="Quantité" required min="1">
+                                    <input type="number" id="price" placeholder="Prix de vente">
+                                    <select name="category" id="category" disabled>
+                                        <option value="">Catégorie</option>
+                                    </select>
+                                    <select name="payment" id="payment" required>
+                                        <option value="">Mode de paiement</option>
+                                        <option value="cash" selected>Cash</option>
+                                        <option value="mobile money">Mobile Money</option>
+                                    </select>
+                                </div>
+                                <button type="submit">Ajouter</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tabContentExpenses" style="display:none;">
+                    <div class="form-section">
+                        <h2 class="title">Mouvements d'aujourd'hui</h2>
+                        <form id="expensesForm">
+                            <div style="margin-bottom: 15px;">
+                                <label for="expenseDate" style="display:block; margin-bottom:5px;">Date du mouvement :</label>
+                                <input type="date" id="expenseDate" required style="width: 100%; padding: 10px; box-sizing: border-box;">
+                            </div>
+                            <div id="expensesContainer">
+                                <!-- Le premier élément de dépense -->
+                                <div class="expense-item">
+                                    <div class="form-group-01">
+                                        <select class="expense-type" required>
+                                            <option value="">Type de mouvement</option>
+                                            <option value="spent">Dépense</option>
+                                            <option value="disburse">Décaissement</option>
+                                        </select>
+                                        <input type="text" class="expense-description" placeholder="Description" required>
+                                        <input type="number" class="expense-price" min="0" placeholder="Montant" required>
+                                        <button type="button" class="remove-expense" style="display:none;">×</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+                                <button type="button" id="addExpenseBtn" style="background-color: #4CAF50; padding: 8px 15px; border: none; color: white; cursor: pointer; border-radius: 4px;">
+                                    + Ajouter une dépense
+                                </button>
+                            </div>
+                            <div style="margin-top: 20px;">
+                                <button type="submit" style="background-color: #2196F3; padding: 10px 20px; border: none; color: white; cursor: pointer; border-radius: 4px;">
+                                    Enregistrer les dépenses
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/assets/js/nav-active.js"></script>
+    <script src="assets/select2/js/jquery.js"></script>
+    <script src="assets/select2/js/select2.min.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#produits').select2({
+                placeholder: "Sélectionner un produit",
+                templateResult: function (data) {
+                    if ($(data.element).data('stock-status') === 'out') {
+                        return $('<span style="color: #e00955;">' + data.text + '</span>');
+                    }
+                    return data.text;
+                }
+            });
+
+            // On ajoute cette initialisation pour les services
+            $('#serviceSelect').select2({
+                placeholder: "Rechercher un service",
+                templateResult: function(data) {
+                    if ($(data.element).prop('disabled')) {
+                        return $('<span style="color: #aaa;">' + data.text + '</span>');
+                    }
+                    return data.text;
+                }
+            });
+        });
+    </script>
+    <script>
+        document.getElementById('importForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('dbFile');
+            if (!fileInput.files.length) return alert("Sélectionnez un fichier .json");
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('db', file);
+
+            const res = await fetch('/api/import-db', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (res.ok) {
+                alert("Base de données importée avec succès !");
+                window.location.reload();
+            } else {
+                const data = await res.json().catch(() => ({}));
+                alert(data.message || "Erreur lors de l'import.");
+            }
+        });
+    </script>
+    <script>
+        document.getElementById("tabProduit").onclick = function(e) {
+            e.preventDefault();
+            document.getElementById("tabContentProduit").style.display = "";
+            document.getElementById("tabContentService").style.display = "none";
+            document.getElementById("tabContentExpenses").style.display = "none";
+            this.classList.add("active");
+            document.getElementById("tabService").classList.remove("active");
+            document.getElementById("tabExpenses").classList.remove("active");
+            this.style.background = "#fff";
+            document.getElementById("tabService").style.background = "#f9f9f9";
+            document.getElementById("tabExpenses").style.background = "#f9f9f9";
+        };
+        document.getElementById("tabService").onclick = function(e) {
+            e.preventDefault();
+            document.getElementById("tabContentProduit").style.display = "none";
+            document.getElementById("tabContentService").style.display = "";
+            document.getElementById("tabContentExpenses").style.display = "none";
+            this.classList.add("active");
+            document.getElementById("tabProduit").classList.remove("active");
+            document.getElementById("tabExpenses").classList.remove("active");
+            this.style.background = "#fff";
+            document.getElementById("tabProduit").style.background = "#f9f9f9";
+            document.getElementById("tabExpenses").style.background = "#f9f9f9";
+        };
+        document.getElementById("tabExpenses").onclick = function(e) {
+            e.preventDefault();
+            document.getElementById("tabContentProduit").style.display = "none";
+            document.getElementById("tabContentService").style.display = "none";
+            document.getElementById("tabContentExpenses").style.display = "";
+            this.classList.add("active");
+            document.getElementById("tabProduit").classList.remove("active");
+            document.getElementById("tabService").classList.remove("active");
+            this.style.background = "#fff";
+            document.getElementById("tabProduit").style.background = "#f9f9f9";
+            document.getElementById("tabService").style.background = "#f9f9f9";
+        };
+    </script>
+</body>
+</html>

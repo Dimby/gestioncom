@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Liste des Commandes</title>
+  <link rel="stylesheet" href="/assets/css/assets.css">
+  <link rel="stylesheet" href="/assets/css/uiv2.css">
+  <link rel="stylesheet" href="/assets/css/listOrders.css">
+</head>
+<body>
+  <div class="root-v2">
+    <nav id="nav-v2"></nav>
+  
+    <div class="main-content" style="justify-content: flex-start; gap: 20px">
+      <div class="titre">
+        <h1 id="orderDateTitle">Commandes</h1>
+        <div class="actions">
+          <div class="month-navigation">
+            <button id="prevMonth" class="month-nav-btn">&lt;</button>
+            <span id="currentMonthDisplay">Septembre</span>
+            <button id="nextMonth" class="month-nav-btn">&gt;</button>
+          </div>
+          <select id="dateSelector" class="date-selector">
+            <option value="">Sélectionner une date</option>
+            <!-- Options seront ajoutées dynamiquement -->
+          </select>
+          <button id="exportExcel" class="export-btn">Exporter en Excel</button>
+        </div>
+      </div>
+      
+      <div id="ordersContainer">
+        <table id="ordersTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nom du produit</th>
+              <th>Catégorie</th>
+              <th>Prix d'achat</th>
+              <th>Prix de vente</th>
+              <th>Stock ajouté</th>
+              <th>Total Achat</th>
+              <th>Total Vente</th>
+              <th>Diff.</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTableBody">
+            <!-- Les données seront insérées ici -->
+          </tbody>
+          <tfoot id="ordersSummary">
+            <tr>
+              <td colspan="6" style="text-align:right"><strong>Totaux :</strong></td>
+              <td id="totalPurchase">0</td>
+              <td id="totalSale">0</td>
+              <td id="totalDiff">0</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ajoute la bibliothèque SheetJS avant tes scripts -->
+  <script src="/assets/js/sheet.min.js"></script>
+  <script src="/assets/js/admin/listOrders.js"></script>
+  <script src="/assets/js/admin/nav.js"></script>
+  
+</body>
+</html>

@@ -1,0 +1,50 @@
+.main-content {
+    padding: 20px;
+}
+
+.filter-options #minPrice, #maxPrice, #minStock, #maxStock, #soldOrder {
+    width: 100px !important;
+}
+
+#editServiceModal h3 {
+    margin: 0;
+}
+
+#editServiceForm {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#editServiceForm .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+button#cancelEditService {
+    background-color:#575858;
+    color: white;
+}
+
+#editRessourcesList {
+    margin-bottom: 20px;
+}
+
+#addEditRessource {
+    background-color: #575858;
+    padding: 5px 10px;
+}
+
+#editServiceForm button[type="button"] {
+    background-color: #575858;
+    color: white;
+}
+
+#editServiceFormSimple .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}

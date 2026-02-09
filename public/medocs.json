@@ -1,0 +1,254 @@
+{
+  "medicines": [
+    {
+      "id": "1755179443150",
+      "brand_name": "Enveloppe A4",
+      "generic_name": "envelope"
+    },
+    {
+      "id": "1755179443151",
+      "brand_name": "Enveloppe A5",
+      "generic_name": "envelope"
+    },
+    {
+      "id": "1755179443152",
+      "brand_name": "Enveloppe kely",
+      "generic_name": "envelope"
+    },
+    {
+      "id": "1755179443153",
+      "brand_name": "Chemise cartonnée - toutes couleurs",
+      "generic_name": "folder"
+    },
+    {
+      "id": "1755179443154",
+      "brand_name": "RAM Papier - Paper One",
+      "generic_name": "office_paper"
+    },
+    {
+      "id": "1755179443155",
+      "brand_name": "RAM papier - Double A",
+      "generic_name": "office_paper"
+    },
+    {
+      "id": "1755179443156",
+      "brand_name": "Bristol - fotsy",
+      "generic_name": "special_paper"
+    },
+    {
+      "id": "1755179443157",
+      "brand_name": "Papier photo A4 - 230g (photo)",
+      "generic_name": "photo_paper"
+    },
+    {
+      "id": "1755179443158",
+      "brand_name": "Papier bureau couleurs",
+      "generic_name": "colored_office_paper"
+    },
+    {
+      "id": "1755179443159",
+      "brand_name": "Pochette A4 perforée",
+      "generic_name": "plastic_sleeve"
+    },
+    {
+      "id": "1755179443160",
+      "brand_name": "Spirale 6mm - 20 feuilles",
+      "generic_name": "spiral_binding"
+    },
+    {
+      "id": "1755179443161",
+      "brand_name": "Spirale 10mm - 40 feuilles (Mainty)",
+      "generic_name": "spiral_binding"
+    },
+    {
+      "id": "1755179443161",
+      "brand_name": "Spirale 10mm - 40 feuilles (Fotsy)",
+      "generic_name": "spiral_binding"
+    },
+    {
+      "id": "1755179443161",
+      "brand_name": "Spirale 12mm - 90 feuilles",
+      "generic_name": "spiral_binding"
+    },
+    {
+      "id": "1755179443162",
+      "brand_name": "Films plastiques pour couverture livre",
+      "generic_name": "book_cover_film"
+    },
+    {
+      "id": "1755179443163",
+      "brand_name": "Films plastiques pour plastification",
+      "generic_name": "lamination_film"
+    },
+    {
+      "id": "1755179443164",
+      "brand_name": "Agrafe DL 0335",
+      "generic_name": "staple"
+    },
+    {
+      "id": "1755179443165",
+      "brand_name": "Papier millimetré",
+      "generic_name": "office_paper"
+    },
+    {
+      "id": "1755179443166",
+      "brand_name": "Bloc Note Moyen - Coloré (TATAMAX)",
+      "generic_name": "notepad"
+    },
+    {
+      "id": "1755179443167",
+      "brand_name": "Bloc Note Petit - Fotsy (TATAMAX)",
+      "generic_name": "notepad"
+    },
+    {
+      "id": "1755179443168",
+      "brand_name": "Carnet Kely",
+      "generic_name": "notepad"
+    },
+    {
+      "id": "1755179443169",
+      "brand_name": "Crayon de couleur",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1755179443170",
+      "brand_name": "Regle (Ensemble)",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1755179443171",
+      "brand_name": "Regle (Simple)",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1755179443172",
+      "brand_name": "Stylo - Maria plus",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1755179443173",
+      "brand_name": "Stylo - Schneider",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1755179443174",
+      "brand_name": "Trombone Kely",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1755179443175",
+      "brand_name": "Trombone Lehibe",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1755179443176",
+      "brand_name": "Barnadaire",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1755179443177",
+      "brand_name": "Gomme - Eraser",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1755179443178",
+      "brand_name": "Scotch Kely",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1755179443179",
+      "brand_name": "Colle Bureau Kely - LAZA",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1755179443180",
+      "brand_name": "Masking Tape",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1755179443181",
+      "brand_name": "Blanco (TATAMAX)",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1755179443182",
+      "brand_name": "Crayon Rose 2B (TATAMAX)",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1755179443183",
+      "brand_name": "Crayon HB Pencils (TATAMAX)",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1755179443184",
+      "brand_name": "Marque Page 4pièces (TATAMAX)",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1755179443185",
+      "brand_name": "Porte Badge",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1755179443186",
+      "brand_name": "Colle Bureau Ngeza - La reine",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1755179443187",
+      "brand_name": "Bloc Note Ngeza - Fotsy (TATAMAX)",
+      "generic_name": "notepad"
+    },
+    {
+      "id": "1755179443188",
+      "brand_name": "Papier couverture",
+      "generic_name": "office_paper"
+    },
+    {
+      "id": "1755179443189",
+      "brand_name": "Papier photo A5 - KODAK (photo)",
+      "generic_name": "photo_paper"
+    },
+    {
+      "id": "1755179443290",
+      "brand_name": "Compas Assorti avec boite (TATAMAX)",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1755179443191",
+      "brand_name": "Stylo 4 couleurs (TATAMAX)",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1755179443192",
+      "brand_name": "Crayon de couleur 12pieces - TATAMAX",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1755179443193",
+      "brand_name": "Gomme - Eraser (Ngeza)",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1755179443194",
+      "brand_name": "Taille Crayon",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1755179443195",
+      "brand_name": "-",
+      "generic_name": "empty"
+    },
+    {
+      "id": "1755179443196",
+      "brand_name": "Stylo Laureat 200",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1755179443197",
+      "brand_name": "Bloc note Cute Limit - Tatamax",
+      "generic_name": "supplies"
+    }
+  ]
+}

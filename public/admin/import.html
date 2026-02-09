@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestion de vente - Import/Export</title>
+    <link rel="stylesheet" href="/assets/css/assets.css">
+    <link rel="stylesheet" href="/assets/css/uiv2.css">
+</head>
+<body>
+    <div class="root-v2">
+        <nav id="nav-v2"></nav>
+
+        <div class="main-content" style="justify-content: center; align-items: center; gap: 20px; width: 100%;">
+            <a href="/api/download-db" id="download-db" download="db.enc" class="nav-link">Télécharger la base de données</a>
+            <section class="import-section">
+                <h2>Importer une base de données</h2>
+                <form id="importForm">
+                    <input type="file" id="dbFile" accept=".enc" required>
+                    <button type="submit">Importer</button>
+                </form>
+            </section>
+        </div>
+    </div>
+
+    <script src="/assets/js/nav-active.js"></script>
+    <script src="/assets/js/admin/nav.js"></script>
+    <script src="/assets/js/import.js"></script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/assets/css/assets.css">
+    <link rel="stylesheet" href="/assets/css/uiv2.css">
+    <title>Inventaire</title>
+</head>
+<body>
+  <div class="root-v2">
+      <nav id="nav-v2"></nav>
+
+      <div class="main-content" style="justify-content: flex-start; gap: 20px">
+        <div class="titre">
+            <h1>Inventaire</h1>
+            <input type="text" id="searchInput" placeholder="Recherche ...">
+        </div>
+        
+        <div class="inventory-container">
+          <table class="inventory-table">
+            <thead>
+              <tr>
+                <th>Nom commercial</th>
+                <th>Prix de vente</th>
+                <th>Stock Global</th>
+                <th>Total (PV * Stock)</th>
+                <th>Inv. - 0</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryTableBody"></tbody>
+          </table>
+          <div id="pagination" class="pagination"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+      <script src="/assets/js/nav-active.js"></script>
+      <script src="/assets/js/admin/nav.js"></script>
+      <script src="/assets/js/admin/inventory.js"></script>
+</body>
+</html>
