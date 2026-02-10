@@ -251,68 +251,88 @@
       "generic_name": "supplies"
     },
     {
-      "id": "1770640314569",
+      "id": "1770716575711",
       "brand_name": "Cahier Calligraphe PM - 100p",
       "generic_name": "supplies"
     },
     {
-      "id": "1770640673357",
+      "id": "1770716670678",
       "brand_name": "Cahier Calligraphe PM - 200p",
       "generic_name": "supplies"
     },
     {
-      "id": "1770640783725",
+      "id": "1770716712928",
       "brand_name": "Cahier Premier Plus GF - 100p",
       "generic_name": "supplies"
     },
     {
-      "id": "1770640829205",
+      "id": "1770716754880",
       "brand_name": "Cahier Premier Plus GF - 200p",
       "generic_name": "supplies"
     },
     {
-      "id": "1770641694729",
-      "brand_name": "Porte Mine Reynolds 0.5",
-      "generic_name": "supplies"
-    },
-    {
-      "id": "1770641764081",
-      "brand_name": "Mine HB 0.5",
-      "generic_name": "supplies"
-    },
-    {
-      "id": "1770642075892",
-      "brand_name": "Stylo - Schneider - Rouge",
-      "generic_name": "supplies"
-    },
-    {
-      "id": "1770642090192",
-      "brand_name": "Stylo - Schneider - Noir",
-      "generic_name": "supplies"
-    },
-    {
-      "id": "1770642110507",
-      "brand_name": "Stylo - Schneider - Vert",
-      "generic_name": "supplies"
-    },
-    {
-      "id": "1770643403539",
+      "id": "1770716815080",
       "brand_name": "Markeur Permanent",
       "generic_name": "supplies"
     },
     {
-      "id": "1770643450020",
+      "id": "1770716847080",
       "brand_name": "Markeur Non-permanent",
       "generic_name": "supplies"
     },
     {
-      "id": "1770643769091",
+      "id": "1770716880133",
+      "brand_name": "Porte Mine Reynolds 0.5",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1770716930181",
+      "brand_name": "Mine HB 0.5",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1770716959598",
+      "brand_name": "Stylo - Schneider - Rouge",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1770716976214",
+      "brand_name": "Stylo - Schneider - Vert",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1770716991451",
+      "brand_name": "Stylo - Schneider - Noir",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1770717109082",
       "brand_name": "Punaise 10x50",
       "generic_name": "supplies"
     },
     {
-      "id": "1770643851692",
+      "id": "1770717187547",
       "brand_name": "Reçu/Facture",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1770717262664",
+      "brand_name": "Sticky Note PM",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1770717326381",
+      "brand_name": "Sticky Note PM Large",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1770717366151",
+      "brand_name": "Sticky Note Paquet",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1770717394548",
+      "brand_name": "Stylo Assorti 10 couleurs",
       "generic_name": "supplies"
     }
   ]
