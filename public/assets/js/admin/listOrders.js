@@ -180,112 +180,136 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     if (!dateKey || !dateMap.has(dateKey)) {
       document.getElementById('orderDateTitle').textContent = 'Commandes';
-      document.getElementById('totalPurchase').textContent = '0';
-      document.getElementById('totalSale').textContent = '0';
       return;
     }
     
     const dateData = dateMap.get(dateKey);
     document.getElementById('orderDateTitle').textContent = `Commandes [${dateData.display}]`;
     
-    let totalPurchase = 0;
-    let totalSale = 0;
-    let totalDiff = 0;
-    
-    // Mettre à jour l'en-tête du tableau pour inclure une colonne #
-    const tableHeader = document.querySelector('#ordersTable thead tr');
-    if (tableHeader && !tableHeader.querySelector('th:first-child')?.textContent.includes('#')) {
-      // Ajouter l'en-tête seulement s'il n'existe pas déjà
-      const numHeader = document.createElement('th');
-      numHeader.textContent = '#';
-      numHeader.style.width = '40px'; // Largeur fixe pour la colonne de numérotation
-      tableHeader.insertBefore(numHeader, tableHeader.firstChild);
-    }
+    let totalPurchase = 0, totalSale = 0, totalDiff = 0;
 
-    // Tri alphabétique des entrées par nom de produit
     dateData.entries.sort((a, b) => a.productName.localeCompare(b.productName));
 
-    // Ajouter chaque entrée au tableau avec numérotation
     dateData.entries.forEach((entry, index) => {
       const purchaseTotal = entry.purchasePrice * entry.stockChange;
       const saleTotal = entry.salePrice * entry.stockChange;
-      const diffSalePurch = saleTotal - purchaseTotal;
+      const diff = saleTotal - purchaseTotal;
       
       totalPurchase += purchaseTotal;
       totalSale += saleTotal;
-      totalDiff += diffSalePurch;
+      totalDiff += diff;
       
       const row = document.createElement('tr');
+      if (entry.isRetroactive) row.classList.add('retroactive-entry');
       
-      // Ajouter une classe spéciale pour les modifications rétroactives
-      if (entry.isRetroactive) {
-        row.classList.add('retroactive-entry');
-      }
-      
-      // Ajout de la numérotation et de la note
       row.innerHTML = `
         <td>${index + 1}</td>
         <td>${entry.productName}</td>
         <td>${entry.category}</td>
-        <td>${entry.purchasePrice} Ar</td>
-        <td>${entry.salePrice} Ar</td>
+        <td>${entry.purchasePrice.toLocaleString()} Ar</td>
+        <td>${entry.salePrice.toLocaleString()} Ar</td>
         <td>${entry.stockChange}</td>
         <td>${purchaseTotal.toLocaleString()} Ar</td>
         <td>${saleTotal.toLocaleString()} Ar</td>
-        <td>${diffSalePurch.toLocaleString()} Ar</td>
-        <td>
-          ${entry.isRetroactive ? '<span title="Modification rétroactive" class="retroactive-indicator">⟲</span>' : ''}
-          <span class="note">${entry.entryNote}</span>
-          <button class="edit-btn" data-id="${entry.productId}">✏️</button>
+        <td>${diff.toLocaleString()} Ar</td>
+        <td style="text-align:center;">
+          <span class="action-edit" title="Modifier" style="cursor:pointer;" 
+                data-id="${entry.productId}" data-date="${entry.date}">✏️</span>
+          <span class="action-delete" title="Supprimer" style="cursor:pointer;margin-left:8px;" 
+                data-id="${entry.productId}" data-date="${entry.date}">🗑️</span>
         </td>
       `;
       tableBody.appendChild(row);
     });
     
-    // Mettre à jour les totaux
     document.getElementById('totalPurchase').textContent = `${totalPurchase.toLocaleString()} Ar`;
     document.getElementById('totalSale').textContent = `${totalSale.toLocaleString()} Ar`;
     document.getElementById('totalDiff').textContent = `${totalDiff.toLocaleString()} Ar`;
-    
-    // Ajouter les gestionnaires d'événements pour les boutons d'édition et de suppression
-    document.querySelectorAll('.edit-btn').forEach(btn => {
-      btn.addEventListener('click', function() {
-        const productId = this.getAttribute('data-id');
-        // Rediriger vers la page d'édition ou ouvrir un modal
-        alert(`Éditer le produit ${productId}`);
-      });
-    });
-    
-    document.querySelectorAll('.delete-btn').forEach(btn => {
-      btn.addEventListener('click', async function() {
-        const productId = this.getAttribute('data-id');
-        const entryDate = this.getAttribute('data-date');
-        
-        if (confirm('Êtes-vous sûr de vouloir supprimer cette entrée ?')) {
-          // Appel API pour supprimer l'entrée
-          try {
-            const response = await fetch(`/api/stocks/${productId}/history`, {
-              method: 'DELETE',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({ date: entryDate })
-            });
-            
-            if (response.ok) {
-              // Recharger le tableau
-              updateOrdersTable(dateKey);
-            } else {
-              alert("Erreur lors de la suppression");
-            }
-          } catch (error) {
-            console.error("Erreur:", error);
-            alert("Une erreur est survenue");
-          }
-        }
-      });
-    });
+
+    initActionButtons(dateKey);
   }
+
+  // Initialisation du Modal (Copie adaptée de listStocks.js)
+function createEditModal() {
+  if (document.getElementById("editModal")) return;
+  const modal = document.createElement("div");
+  modal.id = "editModal";
+  modal.style = "display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000;";
+  modal.innerHTML = `
+    <div style="background:#fff; padding:20px; border-radius:8px; width:350px;">
+      <h3>Modifier la commande</h3>
+      <form id="editOrderForm">
+        <label>Quantité ajoutée</label>
+        <input type="number" id="editQty" required style="width:100%; margin-bottom:10px;">
+        <label>Prix d'achat unitaire</label>
+        <input type="number" id="editPurch" required style="width:100%; margin-bottom:10px;">
+        <label>Prix de vente unitaire</label>
+        <input type="number" id="editSale" required style="width:100%; margin-bottom:20px;">
+        <div style="display:flex; gap:10px;">
+          <button type="submit" style="flex:1; background:#2ecc71; color:white; border:none; padding:10px; border-radius:4px;">Enregistrer</button>
+          <button type="button" id="closeModal" style="flex:1; background:#e74c3c; color:white; border:none; padding:10px; border-radius:4px;">Annuler</button>
+        </div>
+      </form>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+function initActionButtons(dateKey) {
+  createEditModal();
+
+  // LOGIQUE DE SUPPRESSION
+  document.querySelectorAll(".action-delete").forEach(btn => {
+    btn.onclick = async function() {
+      const id = this.getAttribute("data-id");
+      const date = this.getAttribute("data-date");
+      if (confirm("Supprimer cette entrée ? Cela impactera le stock actuel.")) {
+        const res = await fetch(`/api/stocks/${id}/history/entry`, { 
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ date: date })
+        });
+        if (res.ok) window.location.reload();
+      }
+    };
+  });
+
+  // LOGIQUE DE MODIFICATION
+  document.querySelectorAll(".action-edit").forEach(btn => {
+    btn.onclick = function() {
+      const id = this.getAttribute("data-id");
+      const date = this.getAttribute("data-date");
+      const entry = dateMap.get(dateKey).entries.find(e => e.productId === id && e.date === date);
+
+      document.getElementById("editQty").value = entry.stockChange;
+      document.getElementById("editPurch").value = entry.purchasePrice;
+      document.getElementById("editSale").value = entry.salePrice;
+      document.getElementById("editModal").style.display = "flex";
+
+      document.getElementById("editOrderForm").onsubmit = async (e) => {
+        e.preventDefault();
+        const updatedEntry = {
+          date: date,
+          newQty: Number(document.getElementById("editQty").value),
+          newPurch: Number(document.getElementById("editPurch").value),
+          newSale: Number(document.getElementById("editSale").value)
+        };
+
+        const res = await fetch(`/api/stocks/${id}/history/entry`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedEntry)
+        });
+
+        if (res.ok) window.location.reload();
+      };
+    };
+  });
+
+  document.getElementById("closeModal").onclick = () => {
+    document.getElementById("editModal").style.display = "none";
+  };
+}
   
   // Sélectionner la date la plus récente par défaut (si disponible)
   if (sortedDates.length > 0) {

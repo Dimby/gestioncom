@@ -18,9 +18,25 @@
           <h2>Ajouter un nouveau produit</h2>
         
           <form id="stockForm">
-            <select name="produits" id="produits" class="js-example-basic-single" style="width:100%;">
-                <option value="">Sélectionner un produit</option>
+            <input type="text" id="brandName" placeholder="Nom de l'article (ex: Stylo BIC)" required>
+  
+            <select id="genericName" required style="width:100%; margin-bottom: 10px;">
+                <option value="">Sélectionner une catégorie</option>
+                <option value="envelope">ENV (Enveloppe)</option>
+                <option value="folder">DOS (Chemise)</option>
+                <option value="office_paper">PAP (Papier bureau)</option>
+                <option value="special_paper">BRISTOL (Papier bristol)</option>
+                <option value="photo_paper">PHOTO (Papier photo)</option>
+                <option value="colored_office_paper">COLOR (Papier couleur)</option>
+                <option value="plastic_sleeve">POCH (Pochette)</option>
+                <option value="spiral_binding">SPI (Spirales)</option>
+                <option value="book_cover_film">COUV (Couverture livre)</option>
+                <option value="lamination_film">PLAST (Plastification)</option>
+                <option value="staple">AGRA (Agrafe)</option>
+                <option value="notepad">BLOCNOTE (Bloc-note)</option>
+                <option value="supplies">FOURNITURE SCOLAIRE</option>
             </select>
+            
             <input type="number" id="prix" placeholder="Prix d'achat" required min="0">
             <input type="number" id="salePrice" placeholder="Prix de vente" required min="0">
             <input type="number" id="stock" placeholder="Stock à ajouter" required min="1">

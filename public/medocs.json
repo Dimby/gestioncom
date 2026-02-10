@@ -249,6 +249,71 @@
       "id": "1755179443197",
       "brand_name": "Bloc note Cute Limit - Tatamax",
       "generic_name": "supplies"
+    },
+    {
+      "id": "1770640314569",
+      "brand_name": "Cahier Calligraphe PM - 100p",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1770640673357",
+      "brand_name": "Cahier Calligraphe PM - 200p",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1770640783725",
+      "brand_name": "Cahier Premier Plus GF - 100p",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1770640829205",
+      "brand_name": "Cahier Premier Plus GF - 200p",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1770641694729",
+      "brand_name": "Porte Mine Reynolds 0.5",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1770641764081",
+      "brand_name": "Mine HB 0.5",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1770642075892",
+      "brand_name": "Stylo - Schneider - Rouge",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1770642090192",
+      "brand_name": "Stylo - Schneider - Noir",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1770642110507",
+      "brand_name": "Stylo - Schneider - Vert",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1770643403539",
+      "brand_name": "Markeur Permanent",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1770643450020",
+      "brand_name": "Markeur Non-permanent",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1770643769091",
+      "brand_name": "Punaise 10x50",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1770643851692",
+      "brand_name": "Reçu/Facture",
+      "generic_name": "supplies"
     }
   ]
 }
