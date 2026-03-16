@@ -95,6 +95,50 @@ document.addEventListener('DOMContentLoaded', async function() {
     return total;
   }
 
+  function calculateDayMargin(date) {
+
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const day = date.getDate();
+
+    const daySales = salesData.filter(sale => {
+      if (!sale.date) return false;
+
+      const saleDate = new Date(sale.date);
+
+      return (
+        saleDate.getFullYear() === year &&
+        saleDate.getMonth() === month &&
+        saleDate.getDate() === day
+      );
+    });
+
+    let productMargin = 0;
+    let serviceMargin = 0;
+
+    daySales.forEach(sale => {
+
+      const unitPrice = sale.unitPrice || 0;
+      const purchasePrice = sale.purchasePrice || 0;
+      const quantity = sale.quantity || 1;
+
+      const margin = (unitPrice - purchasePrice) * quantity;
+
+      if (sale.category === "service") {
+        serviceMargin += margin;
+      } else {
+        productMargin += margin;
+      }
+
+    });
+
+    return {
+      product: productMargin,
+      service: serviceMargin,
+      total: productMargin + serviceMargin
+    };
+  }
+
   // Fonction pour mettre à jour le tableau journalier (inchangée)
   function updateTreasuryTable(startDate, endDate) {
     const tableBody = document.getElementById('treasuryTableBody');
@@ -125,6 +169,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       const day = new Date(currentDay);
       if (day > today) break;
 
+      const marginData = calculateDayMargin(day);
       const dayRecettes = calculateDayRevenue(day);
       totalRecettes += dayRecettes;
 
@@ -149,8 +194,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         <td>${formatAriary(dayRecettes)}</td>
         <td>${formatAriary(dayDepenses)}</td>
         <td>${formatAriary(daySolde)}</td>
-        <td>${formatAriary(dayDecaissement)}</td>
-        <td>${formatAriary(daySoldeFinal)}</td>
+        <td>
+          [${formatAriary(marginData.product)} + ${formatAriary(marginData.service)}]
+          = ${formatAriary(marginData.total)}
+        </td>
       `;
       tableBody.appendChild(row);
 
@@ -160,7 +207,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     if (daysProcessed === 0) {
       const row = document.createElement('tr');
-      row.innerHTML = `<td colspan="7" class="no-data">Aucune donnée disponible pour cette période</td>`;
+      row.innerHTML = `<td colspan="6" class="no-data">Aucune donnée disponible pour cette période</td>`;
       tableBody.appendChild(row);
     }
     
@@ -314,7 +361,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       summaryTableBody.innerHTML = '';
       let totalRecettes = 0;
       let totalDepenses = 0;
-      let totalDecaissements = 0;
+      let totalMargin = 0;
       let lastSolde = 0;
       for (let i = 0; i < weeks.length; i++) {
         const week = weeks[i];
@@ -323,28 +370,27 @@ document.addEventListener('DOMContentLoaded', async function() {
         const weeklySummary = calculateWeeklySummary(week.start, week.end); 
         totalRecettes += weeklySummary.recettes;
         totalDepenses += weeklySummary.depenses;
-        totalDecaissements += weeklySummary.decaissements;
+        totalMargin += weeklySummary.margin;
         lastSolde = weeklySummary.solde;
         const row = document.createElement('tr');
+        let colorSolde = "#27ae60";
+        if (weeklySummary.solde < 0) {
+          colorSolde = '#e74c3c';
+        }
         row.innerHTML = `
           <td>Semaine ${weekNum}</td>
           <td>${formatAriary(weeklySummary.report)}</td>
           <td>${formatAriary(weeklySummary.recettes)}</td>
           <td>${formatAriary(weeklySummary.depenses)}</td>
-          <td>${formatAriary(weeklySummary.decaissements)}</td>
-          <td>${formatAriary(weeklySummary.solde)}</td>
+          <td style="color:`+colorSolde+`">${formatAriary(weeklySummary.solde)}</td>
+          <td>${formatAriary(weeklySummary.margin)}</td>
         `;
-        if (weeklySummary.solde < 0) {
-          row.querySelector('td:last-child').style.color = '#e74c3c';
-        } else {
-          row.querySelector('td:last-child').style.color = '#27ae60';
-        }
         summaryTableBody.appendChild(row);
       }
       document.getElementById('totalRecapRecettes').textContent = formatAriary(totalRecettes);
       document.getElementById('totalRecapDepenses').textContent = formatAriary(totalDepenses);
-      document.getElementById('totalRecapDecaissements').textContent = formatAriary(totalDecaissements);
       document.getElementById('totalRecapSolde').textContent = formatAriary(lastSolde);
+      document.getElementById('totalRecapMargin').textContent = formatAriary(totalMargin);
       const totalSoldeElement = document.getElementById('totalRecapSolde');
       if (lastSolde < 0) {
         totalSoldeElement.style.color = '#e74c3c';
@@ -358,6 +404,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   // Fonction pour calculer les totaux d'une semaine (MODIFIÉE - non-async)
   function calculateWeeklySummary(startDate, endDate) {
+    let totalMargin = 0;
     let totalRecettes = 0;
     let totalDepenses = 0;
     let totalDecaissements = 0;
@@ -385,14 +432,15 @@ document.addEventListener('DOMContentLoaded', async function() {
       totalDepenses += dayMovements.spent || 0;
       totalDecaissements += dayMovements.disburse || 0;
       currentDay.setDate(currentDay.getDate() + 1);
+      totalMargin += calculateDayMargin(currentDay).total;
     }
     const solde = initialReport + totalRecettes - totalDepenses - totalDecaissements;
     return {
       report: initialReport,
       recettes: totalRecettes,
       depenses: totalDepenses,
-      decaissements: totalDecaissements,
-      solde: solde
+      solde: solde,
+      margin: totalMargin
     };
   }
 

@@ -334,6 +334,36 @@
       "id": "1770717394548",
       "brand_name": "Stylo Assorti 10 couleurs",
       "generic_name": "supplies"
+    },
+    {
+      "id": "1772029120622",
+      "brand_name": "Colle Bureau Kely - La reine",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1772029386469",
+      "brand_name": "Colle Papier Baton",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1773163593253",
+      "brand_name": "Cahier REFLEX 50p",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1773163647701",
+      "brand_name": "Gomme Laureat",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1773163710703",
+      "brand_name": "Carte D'identité Scolaire",
+      "generic_name": "supplies"
+    },
+    {
+      "id": "1773163845203",
+      "brand_name": "Bloc Note Lehibe VAOVAO TATAMAX",
+      "generic_name": "notepad"
     }
   ]
 }

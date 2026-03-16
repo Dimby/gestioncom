@@ -26,6 +26,9 @@ router.post("/", async (req, res) => {
     const stockItem = data.stocks.find(s => s.name === sale.produit);
 
     if (stockItem) {
+      // NOUVEAU : enregistrer le prix d'achat au moment de la vente
+      sale.purchasePrice = stockItem ? stockItem.purchasePrice || 0 : 0;
+
       const stockBefore = stockItem.stock || 0;
       stockItem.stock = stockBefore + stockChange;
       stockItem.sold = (stockItem.sold || 0) + Math.abs(stockChange);
