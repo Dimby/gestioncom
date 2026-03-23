@@ -500,3 +500,159 @@ async function reloadProducts(filter = "") {
   medocsData = data || [];
   renderProducts(filter);
 }
+
+function createOrderModal() {
+
+  if (document.getElementById("orderModal")) return;
+
+  const modal = document.createElement("div");
+  modal.id = "orderModal";
+
+  modal.style = `
+    display:none;
+    position:fixed;
+    top:0;left:0;
+    width:100vw;height:100vh;
+    background:rgba(0,0,0,0.5);
+    justify-content:center;
+    align-items:center;
+  `;
+
+  modal.innerHTML = `
+    <div style="background:#fff;padding:20px;border-radius:10px;max-height: 730px;
+    overflow: auto;">
+      <h3>Simulation commande</h3>
+
+      <table style="width:100%" id="orderTable">
+        <thead>
+          <tr>
+            <th>Produit</th>
+            <th>Fournisseur</th>
+            <th>Prix boîte</th>
+            <th>Quantité</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="orderBody"></tbody>
+      </table>
+
+      <div style="margin-top:15px">
+        <button style="background-color: #575858;" id="addOrderLine">+ Ajouter ligne</button>
+      </div>
+
+      <div style="margin-top:15px">
+        <strong>Total : <span id="orderTotal">0</span></strong>
+      </div>
+
+      <div style="margin-top:10px">
+        <button id="closeOrderModal">Fermer</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  document.getElementById("closeOrderModal").onclick = () => {
+    modal.style.display = "none";
+  };
+
+  document.getElementById("addOrderLine").onclick = () => {
+    addOrderLine();
+  };
+
+  modal.onclick = (e) => {
+    if (e.target === modal) modal.style.display = "none";
+  };
+}
+
+function addOrderLine() {
+
+  const tbody = document.getElementById("orderBody");
+
+  const tr = document.createElement("tr");
+
+  tr.innerHTML = `
+    <td>
+      <select class="order-product-select"></select>
+    </td>
+    <td><input class="order-supplier" readonly></td>
+    <td><input class="order-price" readonly></td>
+    <td><input type="number" class="order-qty" value="1" min="1"></td>
+    <td><button class="remove-line">❌</button></td>
+  `;
+
+  tbody.appendChild(tr);
+
+  const select = tr.querySelector(".order-product-select");
+
+  $(select).select2({
+    placeholder: "Rechercher un produit",
+    width: 'resolve'
+  });
+
+  // remplir produits
+  medocsData.forEach(p => {
+    const option = document.createElement("option");
+    option.value = p.id;
+    option.textContent = p.brand_name;
+    select.appendChild(option);
+  });
+
+  // update auto
+  $(select).on("change", () => {
+    updateLine(tr);
+  });
+  tr.querySelector(".order-qty").oninput = updateTotal;
+
+  tr.querySelector(".remove-line").onclick = () => {
+    tr.remove();
+    updateTotal();
+  };
+
+  // initialiser
+  updateLine(tr);
+}
+
+function updateLine(tr) {
+
+  const id = tr.querySelector(".order-product-select").value;
+  const product = medocsData.find(p => p.id == id);
+
+  if (!product) return;
+
+  tr.querySelector(".order-supplier").value = product.supplier || "-";
+  tr.querySelector(".order-price").value = product.purchaseTotalPrice || 0;
+
+  updateTotal();
+}
+
+function updateTotal() {
+
+  let total = 0;
+  let totalQuantity = 0;
+  let totalLines = 0;
+
+  document.querySelectorAll("#orderBody tr").forEach(tr => {
+    const price = Number(tr.querySelector(".order-price").value);
+    const qty = Number(tr.querySelector(".order-qty").value);
+
+    if (qty > 0) {
+      totalLines++;           // nombre de produits différents
+      totalQuantity += qty;   // quantité totale réelle
+      total += price * qty;
+    }
+  });
+
+  document.getElementById("orderTotal").textContent =
+    `${total} Ar (${totalLines} produits, ${totalQuantity} unités)`;
+}
+
+document.getElementById("simulateOrder").onclick = () => {
+  createOrderModal();
+
+  const modal = document.getElementById("orderModal");
+  modal.style.display = "flex";
+
+  document.getElementById("orderBody").innerHTML = "";
+  addOrderLine();
+};
