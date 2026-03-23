@@ -18,6 +18,10 @@ router.get('/listStocks', isAdmin, (req, res) => {
   res.sendFile(path.join(__dirname, "../public/admin/listStocks.html"));
 });
 
+router.get('/listProducts', isAdmin, (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/admin/listProducts.html"));
+});
+
 router.get('/listServices', isAdmin, (req, res) => {
   res.sendFile(path.join(__dirname, "../public/admin/listServices.html"));
 });

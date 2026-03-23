@@ -64,25 +64,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }]
       };
 
-      try {
-        const res = await fetch("/api/stocks", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(produit)
-        });
+      console.log('produit', JSON.stringify(produit))
 
-        if (res.ok) {
-          alert(`Produit "${brandName}" créé et ajouté au stock !`);
-          stockForm.reset();
-          // Optionnel : rafraîchir la liste des produits pour la section Service
-          populateServiceProduitSelect();
-        } else {
-          const err = await res.json();
-          alert(err.message || "Erreur lors de l'ajout.");
-        }
-      } catch (err) {
-        alert("Erreur réseau.");
-      }
+      // try {
+      //   const res = await fetch("/api/stocks", {
+      //     method: "POST",
+      //     headers: { "Content-Type": "application/json" },
+      //     body: JSON.stringify(produit)
+      //   });
+
+      //   if (res.ok) {
+      //     alert(`Produit "${brandName}" créé et ajouté au stock !`);
+      //     stockForm.reset();
+      //     // Optionnel : rafraîchir la liste des produits pour la section Service
+      //     populateServiceProduitSelect();
+      //   } else {
+      //     const err = await res.json();
+      //     alert(err.message || "Erreur lors de l'ajout.");
+      //   }
+      // } catch (err) {
+      //   alert("Erreur réseau.");
+      // }
     });
   }
 

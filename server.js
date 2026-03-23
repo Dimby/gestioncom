@@ -12,6 +12,7 @@ require("./db");
 const itemsRoutes = require("./routes/items");
 const salesRoutes = require("./routes/sales");
 const stocksRoutes = require("./routes/stocks");
+const productsRoutes = require("./routes/products");
 const servicesRoutes = require("./routes/services");
 const adminRoutes = require("./routes/admin");
 const bestsellersRoutes = require("./routes/bestsellers");
@@ -50,6 +51,7 @@ app.get("/login", (req, res) => {
 app.use("/api/items", itemsRoutes);
 app.use("/api/sales", salesRoutes);
 app.use("/api/stocks", stocksRoutes);
+app.use("/api/products", productsRoutes);
 app.use("/api/services", servicesRoutes);
 app.use("/api", adminRoutes);  // Routes d'authentification et admin
 app.use("/admin", adminRoutes); // Pages admin

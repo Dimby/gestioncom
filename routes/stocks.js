@@ -19,7 +19,7 @@ router.get("/", async (req, res) => { // <-- MODIFIÉ (async)
 // Route POST (ajout stock)
 router.post("/", async (req, res) => { // <-- MODIFIÉ (async)
   try {
-    const { id, name, category, purchasePrice, salePrice, stock, brand_name } = req.body; // brand_name passé pour medocs.json
+    const { id, name, category, pieces, purchaseTotalPrice, purchasePrice, salePrice, stock, brand_name } = req.body; // brand_name passé pour medocs.json
     const data = await readDb();
     
     // 1. Vérification dans la base de données principale
@@ -29,7 +29,7 @@ router.post("/", async (req, res) => { // <-- MODIFIÉ (async)
     }
     
     // 2. Ajout dans db.js
-    data.stocks.push({ id, name, category, purchasePrice, salePrice, stock, sold: 0, history: req.body.history });
+    data.stocks.push({ id, name, category, pieces, purchaseTotalPrice, purchasePrice, salePrice, stock, sold: 0, history: req.body.history });
     await writeDb(data);
     
     // 3. Mise à jour de medocs.json
@@ -41,7 +41,12 @@ router.post("/", async (req, res) => { // <-- MODIFIÉ (async)
       medocsJson.medicines.push({
         id: id,
         brand_name: brand_name || name.split(' - ')[0], // Récupère le nom sans le label
-        generic_name: category
+        generic_name: category,
+        pieces,
+        supplier: category,
+        purchasePrice,
+        salePrice,
+        purchaseTotalPrice,
       });
       
       await fs.writeFile(medocsPath, JSON.stringify(medocsJson, null, 2));
