@@ -109,11 +109,13 @@ router.post('/import-db', upload.single('dbFile'), (req, res) => {
   }
 });
 
-// Route GET (historique des imports)
-router.get('/history-import', async (req, res) => { // <-- MODIFIÉ (async)
+
+// Route GET (historique des imports) - MongoDB version
+const HistoryImport = require("../models/historyImport");
+router.get('/history-import', async (req, res) => {
   try {
-    const data = await readDb(); // <-- MODIFIÉ
-    res.json(data.historyImport || []);
+    const history = await HistoryImport.find();
+    res.json(history);
   } catch (e) {
     res.status(500).json({ message: "Erreur serveur: " + e.message });
   }

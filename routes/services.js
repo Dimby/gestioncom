@@ -1,38 +1,34 @@
 // Fichier: routes/services.js
 const express = require("express");
-const { readDb, writeDb } = require("../db"); // <-- MODIFIÉ
+const Service = require("../models/service");
 
 const router = express.Router();
 
 // Route GET (tous les services)
-router.get("/", async (req, res) => { // <-- MODIFIÉ (async)
+
+// GET all services
+router.get("/", async (req, res) => {
   try {
-    const data = await readDb(); // <-- MODIFIÉ
-    res.json(data.services || []);
+    const services = await Service.find();
+    res.json(services);
   } catch (e) {
     res.status(500).json({ message: "Erreur serveur: " + e.message });
   }
 });
 
 // Route POST (ajout service)
-router.post("/", async (req, res) => { // <-- MODIFIÉ (async)
+
+// POST create service
+router.post("/", async (req, res) => {
   try {
     const service = req.body;
-    if (
-      !service.name ||
-      typeof service.produitId === 'undefined'
-    ) {
+    if (!service.name || typeof service.produitId === 'undefined') {
       return res.status(400).json({ message: "Champs requis manquants ou invalides." });
     }
-    
     service.id = Date.now();
     service.category = "service";
-    
-    const data = await readDb(); // <-- MODIFIÉ
-    data.services = data.services || [];
-    data.services.push(service); // <-- MODIFIÉ
-    await writeDb(data); // <-- MODIFIÉ
-    
+    const newService = new Service(service);
+    await newService.save();
     res.json({ message: "Service enregistré !" });
   } catch (e) {
     res.status(500).json({ message: "Erreur serveur: " + e.message });
@@ -40,20 +36,14 @@ router.post("/", async (req, res) => { // <-- MODIFIÉ (async)
 });
 
 // Route PUT (modification service)
-router.put("/:id", async (req, res) => { // <-- MODIFIÉ (async)
+
+// PUT update service
+router.put("/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
     const updatedServiceData = req.body;
-    
-    const data = await readDb(); // <-- MODIFIÉ
-    const index = data.services.findIndex(s => s.id === id);
-    
-    if (index === -1) return res.status(404).json({ message: "Service non trouvé." });
-    
-    // Fusionner l'ancien objet avec les nouvelles données
-    data.services[index] = { ...data.services[index], ...updatedServiceData }; // <-- MODIFIÉ
-    
-    await writeDb(data); // <-- MODIFIÉ
+    const service = await Service.findOneAndUpdate({ id: id }, updatedServiceData, { new: true });
+    if (!service) return res.status(404).json({ message: "Service non trouvé." });
     res.json({ message: "Service modifié." });
   } catch (e) {
     res.status(500).json({ message: "Erreur serveur: " + e.message });
@@ -61,17 +51,13 @@ router.put("/:id", async (req, res) => { // <-- MODIFIÉ (async)
 });
 
 // Route DELETE (suppression service)
-router.delete("/:id", async (req, res) => { // <-- MODIFIÉ (async)
+
+// DELETE service
+router.delete("/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
-    const data = await readDb(); // <-- MODIFIÉ
-    
-    const index = data.services.findIndex(s => s.id === id);
-    if (index === -1) return res.status(404).json({ message: "Service non trouvé." });
-    
-    data.services.splice(index, 1); // <-- MODIFIÉ
-    
-    await writeDb(data); // <-- MODIFIÉ
+    const service = await Service.findOneAndDelete({ id: id });
+    if (!service) return res.status(404).json({ message: "Service non trouvé." });
     res.json({ message: "Service supprimé." });
   } catch (e) {
     res.status(500).json({ message: "Erreur serveur: " + e.message });

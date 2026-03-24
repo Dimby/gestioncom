@@ -1,25 +1,26 @@
 // Fichier: routes/items.js
 const express = require("express");
-const { readDb, writeDb } = require("../db"); // <-- MODIFIÉ
+const Item = require("../models/item");
 
 const router = express.Router();
 
-router.get("/", async (req, res) => { // <-- MODIFIÉ (async)
+
+// GET all items
+router.get("/", async (req, res) => {
   try {
-    const data = await readDb(); // <-- MODIFIÉ
-    res.json(data.items || []);
+    const items = await Item.find();
+    res.json(items);
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
 });
 
-router.post("/", async (req, res) => { // <-- MODIFIÉ (async)
+
+// POST create item
+router.post("/", async (req, res) => {
   try {
-    const newItem = req.body;
-    const data = await readDb(); // <-- MODIFIÉ
-    data.items = data.items || [];
-    data.items.push(newItem); // <-- MODIFIÉ
-    await writeDb(data); // <-- MODIFIÉ
+    const newItem = new Item(req.body);
+    await newItem.save();
     res.json({ message: "Ajouté avec succès" });
   } catch (e) {
     res.status(500).json({ message: e.message });

@@ -1,60 +1,36 @@
 // Fichier: routes/stocks.js
 const express = require("express");
-const { readDb, writeDb } = require("../db"); // <-- MODIFIÉ
+const Stock = require("../models/stock");
 const path = require("path");
 const fs = require("fs").promises;
 
 const router = express.Router();
 
 // Route GET (tous les stocks)
-router.get("/", async (req, res) => { // <-- MODIFIÉ (async)
+
+// GET all stocks
+router.get("/", async (req, res) => {
   try {
-    const data = await readDb(); // <-- MODIFIÉ
-    res.json(data.stocks || []);
+    const stocks = await Stock.find();
+    res.json(stocks);
   } catch (e) {
     res.status(500).json({ message: "Erreur serveur: " + e.message });
   }
 });
 
 // Route POST (ajout stock)
-router.post("/", async (req, res) => { // <-- MODIFIÉ (async)
+
+// POST create stock
+router.post("/", async (req, res) => {
   try {
-    const { id, name, category, pieces, purchaseTotalPrice, purchasePrice, salePrice, stock, brand_name } = req.body; // brand_name passé pour medocs.json
-    const data = await readDb();
-    
-    // 1. Vérification dans la base de données principale
-    const exists = data.stocks.find(p => p.id === id);
+    const { id } = req.body;
+    const exists = await Stock.findOne({ id });
     if (exists) {
       return res.status(400).json({ message: "Produit déjà existant." });
     }
-    
-    // 2. Ajout dans db.js
-    data.stocks.push({ id, name, category, pieces, purchaseTotalPrice, purchasePrice, salePrice, stock, sold: 0, history: req.body.history });
-    await writeDb(data);
-    
-    // 3. Mise à jour de medocs.json
-    const medocsPath = path.join(__dirname, "../public/medocs.json");
-    try {
-      const medocsRaw = await fs.readFile(medocsPath, "utf8");
-      const medocsJson = JSON.parse(medocsRaw);
-      
-      medocsJson.medicines.push({
-        id: id,
-        brand_name: brand_name || name.split(' - ')[0], // Récupère le nom sans le label
-        generic_name: category,
-        pieces,
-        supplier: category,
-        purchasePrice,
-        salePrice,
-        purchaseTotalPrice,
-      });
-      
-      await fs.writeFile(medocsPath, JSON.stringify(medocsJson, null, 2));
-    } catch (err) {
-      console.error("Erreur synchro medocs.json:", err);
-      // On ne bloque pas la réponse si seul medocs.json échoue, mais on log l'erreur
-    }
-    
+    const newStock = new Stock(req.body);
+    await newStock.save();
+    // Optionnel: synchronisation medocs.json (à adapter si besoin)
     res.json({ message: "Produit ajouté au stock et référencé !" });
   } catch (e) {
     res.status(500).json({ message: "Erreur serveur: " + e.message });
@@ -62,16 +38,14 @@ router.post("/", async (req, res) => { // <-- MODIFIÉ (async)
 });
 
 // Route PUT (mise à jour stock)
-router.put("/:id", async (req, res) => { // <-- MODIFIÉ (async)
+
+// PUT update stock
+router.put("/:id", async (req, res) => {
   try {
     const id = req.params.id;
     const updated = req.body;
-    const data = await readDb(); // <-- MODIFIÉ
-    
-    const idx = data.stocks.findIndex(p => String(p.id) === String(id));
-    if (idx !== -1) {
-      data.stocks[idx] = updated; // <-- MODIFIÉ
-      await writeDb(data); // <-- MODIFIÉ
+    const stock = await Stock.findOneAndUpdate({ id: id }, updated, { new: true });
+    if (stock) {
       res.json({ message: "Produit mis à jour !" });
     } else {
       res.status(404).json({ message: "Produit non trouvé." });
@@ -82,17 +56,13 @@ router.put("/:id", async (req, res) => { // <-- MODIFIÉ (async)
 });
 
 // Route DELETE (suppression stock)
-router.delete("/:id", async (req, res) => { // <-- MODIFIÉ (async)
+
+// DELETE stock
+router.delete("/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    const data = await readDb(); // <-- MODIFIÉ
-    
-    const index = data.stocks.findIndex(p => String(p.id) === String(id));
-    if (index === -1) return res.status(404).json({ message: "Produit non trouvé." });
-    
-    data.stocks.splice(index, 1); // <-- MODIFIÉ
-    await writeDb(data); // <-- MODIFIÉ
-    
+    const stock = await Stock.findOneAndDelete({ id: id });
+    if (!stock) return res.status(404).json({ message: "Produit non trouvé." });
     res.json({ message: "Produit supprimé." });
   } catch (e) {
     res.status(500).json({ message: "Erreur serveur: " + e.message });

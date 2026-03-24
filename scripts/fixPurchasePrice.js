@@ -1,30 +1,22 @@
-const { readDb, writeDb } = require("../db");
+
+const Sale = require("../models/sale");
+const Stock = require("../models/stock");
+
 
 async function fixPurchasePrice() {
-
-  const data = await readDb();
-
+  const sales = await Sale.find();
   let updated = 0;
-
-  data.sales.forEach(sale => {
-
-    // si déjà présent on ne touche pas
-    if (sale.purchasePrice !== undefined) return;
-
-    // retrouver le produit dans le stock
-    const stockItem = data.stocks.find(s => s.name === sale.produit);
-
+  for (const sale of sales) {
+    if (sale.purchasePrice !== undefined) continue;
+    const stockItem = await Stock.findOne({ name: sale.produit });
     if (stockItem) {
       sale.purchasePrice = stockItem.purchasePrice || 0;
     } else {
       sale.purchasePrice = 0;
     }
-
+    await sale.save();
     updated++;
-  });
-
-  await writeDb(data);
-
+  }
   console.log(`Migration terminée : ${updated} ventes mises à jour`);
 }
 

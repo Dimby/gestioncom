@@ -1,15 +1,14 @@
 // Fichier: routes/bestsellers.js
 const express = require("express");
-const { readDb } = require("../db"); // <-- MODIFIÉ
+const Sale = require("../models/sale");
+const Stock = require("../models/stock");
 
 const router = express.Router();
 
-router.get("/", async (req, res) => { // <-- MODIFIÉ (async)
+router.get("/", async (req, res) => {
   try {
-    const data = await readDb(); // <-- MODIFIÉ
-    const sales = data.sales || [];
-    const stocks = data.stocks || [];
-    
+    const sales = await Sale.find();
+    const stocks = await Stock.find();
     // Le reste de votre logique de calcul est correcte
     const stockDict = {};
     stocks.forEach(product => {

@@ -7,6 +7,9 @@ const fs = require("fs");
 const multer = require("multer");
 
 // Import des modules
+// --- MONGOOSE INIT ---
+require("./models"); // Connects to MongoDB
+// --- END MONGOOSE INIT ---
 // On charge db.js pour lancer la migration au démarrage
 require("./db"); 
 const itemsRoutes = require("./routes/items");
