@@ -4,7 +4,7 @@ const stockSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
   name: { type: String, required: true },
   category: { type: String },
-  pieces: { type: Number },
+  pieces: { type: String },
   purchaseTotalPrice: { type: Number },
   purchasePrice: { type: Number },
   salePrice: { type: Number },

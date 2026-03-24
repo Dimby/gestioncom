@@ -1,11 +1,8 @@
 const mongoose = require('mongoose');
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/gestioncom';
+const MONGO_URI = 'mongodb+srv://dbGestionCom:dbGestionCom1234!!!@cluster0.1epwov1.mongodb.net/';
 
-mongoose.connect(MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+mongoose.connect(MONGO_URI);
 
 mongoose.connection.on('connected', () => {
   console.log('MongoDB connected');
