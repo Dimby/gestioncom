@@ -44,7 +44,37 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Configuration des écouteurs d'événements
     setupEventListeners(); // Les listeners pour les boutons jour/précédent sont ajoutés ici
+
+    const savedDate = localStorage.getItem('historySelectedDate');
+    const savedSwitch = localStorage.getItem('historyTodaySwitch');
+
+    if (savedDate) {
+      selectedDate = new Date(savedDate);
+      selectedDate.setHours(0, 0, 0, 0);
+    }
+
+    const todaySwitch = document.getElementById('todayFilterSwitch');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (todaySwitch) {
+      const isToday = selectedDate.getTime() === today.getTime();
+
+      // Le switch dépend de la date, pas du localStorage
+      todaySwitch.checked = isToday;
+    }
+
     updateDateDisplay(); // Affiche la date initiale (aujourd'hui)
+
+    const savedTab = localStorage.getItem('historyActiveTab');
+
+    if (savedTab === 'service') {
+      document.getElementById('tabService')?.click();
+    } else if (savedTab === 'mouvements') {
+      document.getElementById('tabMouvements')?.click();
+    } else {
+      document.getElementById('tabProduit')?.click(); // défaut
+    }
 
     // Initialisation des tableaux
     renderTable(); // Affiche l'onglet produit par défaut avec les données d'aujourd'hui
@@ -91,10 +121,13 @@ function setupEventListeners() {
 
   // MODIFICATION : Listener pour le switch "Aujourd'hui"
   if (todayFilterSwitch) {
+    localStorage.setItem('historyTodaySwitch', todayFilterSwitch.checked);
     todayFilterSwitch.addEventListener('change', function() {
       if (this.checked) {
         selectedDate = new Date(); // Se remet à aujourd'hui
         selectedDate.setHours(0, 0, 0, 0);
+
+        localStorage.setItem('historySelectedDate', selectedDate.toISOString());
       } else {
         // Quand on décoche, on reste sur le jour sélectionné par les flèches
         // Si on voulait TOUT afficher, on mettrait selectedDate = null; ici
@@ -108,6 +141,8 @@ function setupEventListeners() {
   if (prevDayBtn) {
     prevDayBtn.addEventListener('click', () => {
       selectedDate.setDate(selectedDate.getDate() - 1); // Recule d'un jour
+      localStorage.setItem('historySelectedDate', selectedDate.toISOString());
+      localStorage.setItem('historyTodaySwitch', 'false');
       // Décoche automatiquement le switch "Aujourd'hui" si on navigue
       if (todayFilterSwitch) todayFilterSwitch.checked = false;
       updateDateDisplay();
@@ -122,6 +157,7 @@ function setupEventListeners() {
       // Ne pas aller au-delà d'aujourd'hui
       if (selectedDate < today) {
           selectedDate.setDate(selectedDate.getDate() + 1); // Avance d'un jour
+          localStorage.setItem('historySelectedDate', selectedDate.toISOString());
           // Si on arrive à aujourd'hui, on coche le switch
           if (todayFilterSwitch) todayFilterSwitch.checked = (selectedDate.getTime() === today.getTime());
           updateDateDisplay();
@@ -175,24 +211,27 @@ function setupTabNavigation() {
     if (tabProduit) {
       tabProduit.onclick = function(e) {
         e.preventDefault();
+        localStorage.setItem('historyActiveTab', 'produit');
         activateTab(this, 'tabContentProduit', [tabService, tabMouvements]);
-        renderTable(); // Charger les données du tableau produit
+        renderTable();
       };
     }
 
     if (tabService) {
       tabService.onclick = function(e) {
         e.preventDefault();
+        localStorage.setItem('historyActiveTab', 'service');
         activateTab(this, 'tabContentService', [tabProduit, tabMouvements]);
-        renderSalesServiceTable(); // Charger les données du tableau service
+        renderSalesServiceTable();
       };
     }
 
     if (tabMouvements) {
       tabMouvements.onclick = function(e) {
         e.preventDefault();
+        localStorage.setItem('historyActiveTab', 'mouvements');
         activateTab(this, 'tabContentMouvements', [tabProduit, tabService]);
-        renderMouvementsTable(); // Charger les données du tableau mouvements
+        renderMouvementsTable();
       };
     }
 }

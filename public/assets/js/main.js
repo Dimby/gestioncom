@@ -1,13 +1,35 @@
 $(document).ready(async function() {
 
   // Fonction pour mettre la date d'aujourd'hui au format YYYY-MM-DD
-  const setTodayDate = () => {
-    const today = new Date().toISOString().split('T')[0];
-    if(document.getElementById('serviceDate')) document.getElementById('serviceDate').value = today;
-    if(document.getElementById('productDate')) document.getElementById('productDate').value = today;
-    if(document.getElementById('expenseDate')) document.getElementById('expenseDate').value = today;
+  const initDate = (id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    const saved = localStorage.getItem(id);
+    if (saved) {
+      el.value = saved;
+    } else {
+      const today = new Date().toISOString().split('T')[0];
+      el.value = today;
+    }
   };
-  setTodayDate();
+
+  initDate('serviceDate');
+  initDate('productDate');
+  initDate('expenseDate');
+
+  const saveDate = (id) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+    el.addEventListener('change', () => {
+      localStorage.setItem(id, el.value);
+    });
+  };
+
+  saveDate('serviceDate');
+  saveDate('productDate');
+  saveDate('expenseDate');
 
   // Fonction utilitaire pour combiner la Date choisie avec l'Heure actuelle
   // Cela permet de garder un tri chronologique correct même si on change le jour
@@ -154,11 +176,40 @@ $(document).ready(async function() {
     });
   }
 
-  if (tabProduit) { tabProduit.onclick = function(e) { e.preventDefault(); activateTab(tabProduit, tabContentProduit, [tabService, tabExpenses], [tabContentService, tabContentExpenses]); }; }
-  if (tabService) { tabService.onclick = function(e) { e.preventDefault(); activateTab(tabService, tabContentService, [tabProduit, tabExpenses], [tabContentProduit, tabContentExpenses]); loadServiceData(); }; }
-  if (tabExpenses) { tabExpenses.onclick = function(e) { e.preventDefault(); activateTab(tabExpenses, tabContentExpenses, [tabProduit, tabService], [tabContentProduit, tabContentService]); }; }
+  if (tabProduit) { 
+    tabProduit.onclick = function(e) {
+      e.preventDefault();
+      localStorage.setItem('activeTab', 'produit');
+      activateTab(tabProduit, tabContentProduit, [tabService, tabExpenses], [tabContentService, tabContentExpenses]);
+    }; 
+  }
+  if (tabService) { 
+    tabService.onclick = function(e) {
+      e.preventDefault();
+      localStorage.setItem('activeTab', 'service');
+      activateTab(tabService, tabContentService, [tabProduit, tabExpenses], [tabContentProduit, tabContentExpenses]);
+      loadServiceData();
+    }; 
+  }
+  if (tabExpenses) { 
+    tabExpenses.onclick = function(e) {
+      e.preventDefault();
+      localStorage.setItem('activeTab', 'expenses');
+      activateTab(tabExpenses, tabContentExpenses, [tabProduit, tabService], [tabContentProduit, tabContentService]);
+    };
+  }
 
   loadServiceData();
+
+  const savedTab = localStorage.getItem('activeTab');
+
+  if (savedTab === 'produit') {
+    tabProduit.click();
+  } else if (savedTab === 'expenses') {
+    tabExpenses.click();
+  } else {
+    tabService.click(); // défaut
+  }
   
   // --- Logique du formulaire Service ---
   $("#serviceSelect, #serviceQuantity").on("change input", calculateServicePrice);
