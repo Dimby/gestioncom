@@ -14,10 +14,10 @@ fetch("/api/stocks")
   });
 
 let medocsData = [];
-fetch("/medocs.json")
-  .then(res => res.json())
-  .then(data => {
-    medocsData = data.medicines || [];
+fetch("/api/products")
+  .then((res) => res.json())
+  .then((data) => {
+    medocsData = data || [];
   });
 
 let currentPage = 1;

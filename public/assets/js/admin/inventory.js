@@ -4,11 +4,11 @@ document.addEventListener('DOMContentLoaded', async function () {
   let currentPage = 1;
   let itemsPerPage = 10;
 
-  // Récupère les données du fichier medocs.json
+  // Récupère les données depuis l'API MongoDB
   async function fetchMedicines() {
-    const res = await fetch('/medocs.json');
+    const res = await fetch('/api/products');
     const data = await res.json();
-    medicines = data.medicines || [];
+    medicines = data || [];
     filteredMedicines = medicines;
   }
 
