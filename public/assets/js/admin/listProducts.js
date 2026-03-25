@@ -432,13 +432,20 @@ function createProductAddModal() {
                 purchaseTotalPrice: Number(modal.querySelector("#addTotalPrice").value) || 0,
             };
 
-            // await fetch("/api/products", {
-            //     method:"POST",
-            //     headers:{ "Content-Type":"application/json" },
-            //     body: JSON.stringify(product)
-            // });
+            // 1️⃣ Sauvegarder dans le schéma Product
+            const productRes = await fetch("/api/products", {
+                method:"POST",
+                headers:{ "Content-Type":"application/json" },
+                body: JSON.stringify(product)
+            });
 
-            const values = JSON.stringify({
+            if (!productRes.ok) {
+                const err = await productRes.json();
+                throw new Error(err.message || "Erreur lors de l'ajout du produit");
+            }
+
+            // 2️⃣ Sauvegarder dans le schéma Stock
+            const stockData = {
                 id: newId,
                 brand_name: product.brand_name,
                 name: product.brand_name + " - " + product.generic_name,
@@ -456,23 +463,20 @@ function createProductAddModal() {
                     salePrice: product.salePrice,
                     note: "Création initiale du produit"
                 }]
-            });
-            console.log('values', values)
+            };
 
-            const res = await fetch("/api/stocks", {
+            const stockRes = await fetch("/api/stocks", {
                 method:"POST",
                 headers:{ "Content-Type":"application/json" },
-                body: values
+                body: JSON.stringify(stockData)
             });
 
-            if (res.ok) {
-                alert(`Produit créé et ajouté au stock !`);
-            } else {
-                const err = await res.json();
-                alert(err.message || "Erreur lors de l'ajout.");
+            if (!stockRes.ok) {
+                const err = await stockRes.json();
+                throw new Error(err.message || "Erreur lors de l'ajout du stock");
             }
 
-            alert("Produit ajouté !");
+            alert("Produit créé et ajouté au stock !");
             modal.style.display = "none";
 
             reloadProducts();
