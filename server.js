@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 const path = require("path");
 const fs = require("fs");
 const multer = require("multer");
+require('dotenv').config();
 
 // Import des modules
 // --- MONGOOSE INIT ---

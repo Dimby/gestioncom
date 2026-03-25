@@ -11,5 +11,5 @@ const medocSchema = new mongoose.Schema({
   purchaseTotalPrice: { type: Number }
 });
 
-const Medoc = mongoose.model('Medoc', medocSchema);
-module.exports = Medoc;
+const Product = mongoose.model('Product', medocSchema);
+module.exports = Product;

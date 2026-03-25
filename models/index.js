@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const MONGO_URI = 'mongodb+srv://dbGestionCom:dbGestionCom1234!!!@cluster0.1epwov1.mongodb.net/';
+const MONGO_URI = process.env.MONGO_URI;
 
 mongoose.connect(MONGO_URI);
 
