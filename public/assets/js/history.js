@@ -70,7 +70,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 function setupCategoryFilter(sales) {
-    const categories = [...new Set(sales.map(s => s.category).filter(Boolean))];
+    const stocks = cachedStocks || [];
+    const categories = [...new Set(stocks.map(s => s.category).filter(Boolean))];
     const categoryFilter = document.getElementById("categoryFilter");
     if (categoryFilter) {
       // Vider les options existantes sauf la première
@@ -315,17 +316,20 @@ async function renderTable() {
       }
 
       filteredSales = filteredSales.filter(sale => {
+        const product = stocks.find(s => s.id === sale.productId);
+        const produitName = product ? product.name : "";
+        const category = product ? product.category : "";
+
         if (search &&
-            !((sale.produit || "").toLowerCase().includes(search) ||
-              (sale.category || "").toLowerCase().includes(search))) {
+            !(produitName.toLowerCase().includes(search) ||
+              category.toLowerCase().includes(search))) {
           return false;
         }
-        if (cat && sale.category !== cat) return false;
+        if (cat && category !== cat) return false;
         if (payment && sale.payment !== payment) return false;
         if (minPrice !== null && sale.salePrice < minPrice) return false;
         if (maxPrice !== null && sale.salePrice > maxPrice) return false;
-        const stockObj = stocks.find(s => s.name === sale.produit);
-        const stockActuel = stockObj ? stockObj.stock : "N/A";
+        const stockActuel = product ? product.stock : "N/A";
         if (stockF === "negative" && stockActuel >= 0) return false;
         if (stockF === "less" && !(stockActuel < 5)) return false;
         if (stockF === "more" && !(stockActuel >= 5)) return false;
@@ -347,14 +351,17 @@ async function renderTable() {
       if (!tbody) return;
       tbody.innerHTML = "";
       paginatedSales.forEach(sale => {
+        const product = stocks.find(s => s.id === sale.productId);
+        const produitName = product ? product.name : "Produit supprimé";
+        const category = product ? product.category : "";
         const prixUnitaire = sale.unitPrice ? formatAr(sale.unitPrice) : "";
         const dateFormatee = formatDate(sale.date);
         const tr = document.createElement("tr");
         tr.setAttribute("data-id", sale.id);
         tr.innerHTML = `
           <td>${dateFormatee}</td>
-          <td>${sale.produit || ""}</td>
-          <td>${getFormLabel(sale.category) || ""}</td>
+          <td>${produitName}</td>
+          <td>${getFormLabel(category) || ""}</td>
           <td>${sale.payment || ""}</td>
           <td>${sale.quantity || ""}</td>
           <td style="text-align:right;">${prixUnitaire}</td>
@@ -696,7 +703,7 @@ async function editSale(id, isService) {
     } else { // C'est un produit
       createProductEditModal();
       const modal = document.getElementById("editProductModal");
-      const produit = cachedStocks.find(p => p.name === sale.produit);
+      const produit = cachedStocks.find(p => p.id === sale.productId);
 
       // Remplir les champs
       const produitSelectElement = document.getElementById('edit-produits');
@@ -737,11 +744,11 @@ async function editSale(id, isService) {
 
         const updatedSale = {
           id: sale.id,
-          produit: selectedProduit.name,
-          category: document.getElementById('edit-category').value, // Prendre la valeur affichée
+          productId: selectedProduit.id,
           quantity: Number(document.getElementById('edit-quantity').value),
           salePrice: Number(document.getElementById('edit-price').value),
           unitPrice: selectedProduit.salePrice,
+          purchasePrice: selectedProduit.purchasePrice || 0,
           payment: document.getElementById('edit-payment').value,
           date: sale.date
         };
@@ -774,9 +781,11 @@ async function deleteSale(id) {
     const sale = cachedSales.find(s => s.id == id);
     if (!sale) return;
 
-    const confirmMsg = sale.category === 'service'
-      ? `Voulez-vous vraiment supprimer la vente du service : [${sale.name}] ?`
-      : `Voulez-vous vraiment supprimer la vente du produit : [${sale.produit}] ?`;
+    const stocks = cachedStocks || [];
+    const product = stocks.find(s => s.id === sale.productId);
+    const produitName = product ? product.name : "Produit supprimé";
+
+    const confirmMsg = `Voulez-vous vraiment supprimer la vente du produit : [${produitName}] ?`;
 
     if (confirm(confirmMsg + "\n\nCette action restaurera également le stock.")) {
       try {

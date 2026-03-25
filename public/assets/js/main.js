@@ -219,13 +219,12 @@ $(document).ready(async function() {
       }
 
       const sale = {
-        id: Date.now(),
-        name: service.name,
-        category: service.category || "service",
-        produit: produitUtilise.name,
+        id: Date.now().toString(),
+        productId: produitUtilise.id,
         quantity,
         salePrice,
         unitPrice: Number(service.price),
+        purchasePrice: produitUtilise.purchasePrice || 0,
         payment,
         date: getFullDateFromInput('serviceDate')
       };
@@ -274,12 +273,12 @@ $(document).ready(async function() {
         }
 
         const sale = {
-            id: Date.now(),
-            produit: produit.name,
-            category: categorySelect.value,
+            id: Date.now().toString(),
+            productId: produit.id,
             quantity: Number(quantityInput.value),
             salePrice: Number(priceInput.value),
             unitPrice: produit.salePrice,
+            purchasePrice: produit.purchasePrice || 0,
             payment: paymentSelect.value,
             date: getFullDateFromInput('productDate')
         };

@@ -2,13 +2,13 @@ const mongoose = require('mongoose');
 
 const saleSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
-  produit: { type: String, required: true },
+  productId: { type: String, required: true },
   quantity: { type: Number, required: true },
+  salePrice: { type: Number, required: true },
+  unitPrice: { type: Number, required: true },
   purchasePrice: { type: Number },
-  date: { type: Date, default: Date.now },
-  category: { type: String },
-  name: { type: String },
-  // Ajoute d'autres champs selon besoin
+  payment: { type: String, enum: ['cash', 'mobile money'], required: true },
+  date: { type: Date, default: Date.now }
 });
 
 const Sale = mongoose.model('Sale', saleSchema);
