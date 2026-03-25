@@ -28,26 +28,33 @@ $(document).ready(async function() {
     const res = await fetch("/api/stocks");
     produits = await res.json();
 
-    produits.forEach((p) => {
+    // Trier les produits : les disponibles d'abord, puis les épuisés
+    const available = produits.filter(p => p.stock > 0);
+    const outOfStock = produits.filter(p => p.stock <= 0);
+    const sorted = [...available, ...outOfStock];
+
+    sorted.forEach((p) => {
       const optionText = p.name + ' - ' + formatAr(p.salePrice);
       const $option = $('<option>', {
         value: p.id
       });
 
       if (p.stock <= 0) {
-        $option.text(optionText + ' - [Stock épuisé]'); // Ajoute le message
-        $option.prop('disabled', true); // Désactive l'option
+        $option.text(optionText + ' - [Stock épuisé]');
+        $option.prop('disabled', true);
         $option.attr('data-stock-status', 'out');
       } else {
-        $option.text(optionText + ' - ' + p.stock + ' en stock'); // Texte normal
+        $option.text(optionText + ' - ' + p.stock + ' en stock');
+        $option.attr('data-stock-status', 'available');
       }
 
-      $('#produits').append($option); // Ajoute l'option (modifiée ou non)
+      $('#produits').append($option);
     });
 
     $('#produits').trigger('change.select2');
 
   } catch (e) {
+    console.error('Erreur chargement stocks:', e);
     $('#produits').html('<option value="">Erreur chargement produits</option>');
   }
 
