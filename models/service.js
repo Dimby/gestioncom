@@ -1,11 +1,12 @@
 const mongoose = require('mongoose');
 
 const serviceSchema = new mongoose.Schema({
-  id: { type: Number, required: true, unique: true },
+  id: { type: String, required: true, unique: true },
   name: { type: String, required: true },
-  produitId: { type: String },
-  category: { type: String },
-  // Ajoute d'autres champs selon besoin
+  price: { type: Number, required: true },
+  produitId: { type: String, required: true },
+  info: { type: String },
+  category: { type: String, default: 'service' }
 });
 
 const Service = mongoose.model('Service', serviceSchema);

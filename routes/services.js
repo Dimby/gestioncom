@@ -22,10 +22,10 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     const service = req.body;
-    if (!service.name || typeof service.produitId === 'undefined') {
-      return res.status(400).json({ message: "Champs requis manquants ou invalides." });
+    if (!service.name || !service.price || !service.produitId) {
+      return res.status(400).json({ message: "Champs requis manquants: name, price, produitId." });
     }
-    service.id = Date.now();
+    service.id = Date.now().toString();
     service.category = "service";
     const newService = new Service(service);
     await newService.save();
@@ -40,7 +40,7 @@ router.post("/", async (req, res) => {
 // PUT update service
 router.put("/:id", async (req, res) => {
   try {
-    const id = Number(req.params.id);
+    const id = req.params.id;
     const updatedServiceData = req.body;
     const service = await Service.findOneAndUpdate({ id: id }, updatedServiceData, { new: true });
     if (!service) return res.status(404).json({ message: "Service non trouvé." });
@@ -55,7 +55,7 @@ router.put("/:id", async (req, res) => {
 // DELETE service
 router.delete("/:id", async (req, res) => {
   try {
-    const id = Number(req.params.id);
+    const id = req.params.id;
     const service = await Service.findOneAndDelete({ id: id });
     if (!service) return res.status(404).json({ message: "Service non trouvé." });
     res.json({ message: "Service supprimé." });

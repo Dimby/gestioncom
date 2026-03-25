@@ -24,8 +24,8 @@ router.post("/", async (req, res) => {
   try {
     const sale = req.body;
     const stockChange = -sale.quantity;
-    // On cherche le produit vendu dans le stock par son nom
-    const stockItem = await Stock.findOne({ name: sale.produit });
+    // On cherche le produit vendu dans le stock par son ID
+    const stockItem = await Stock.findOne({ id: sale.productId });
     if (stockItem) {
       sale.purchasePrice = stockItem.purchasePrice || 0;
       const stockBefore = stockItem.stock || 0;
@@ -36,7 +36,7 @@ router.post("/", async (req, res) => {
         date: sale.date || new Date().toISOString(),
         change: stockChange,
         stockBefore: stockBefore,
-        note: sale.category === "service" ? `Vente Service : ${sale.name}` : "Vente"
+        note: "Vente"
       });
       await stockItem.save();
     }
@@ -62,7 +62,7 @@ router.put("/:id", async (req, res) => {
       return res.status(404).json({ message: "Vente non trouvée" });
     }
     // 2. Annuler l'impact de la vente originale sur le stock
-    const originalStockItem = await Stock.findOne({ name: originalSale.produit });
+    const originalStockItem = await Stock.findOne({ id: originalSale.productId });
     if (originalStockItem) {
       const stockBeforeReversal = originalStockItem.stock || 0;
       originalStockItem.stock += originalSale.quantity;
@@ -77,7 +77,7 @@ router.put("/:id", async (req, res) => {
       await originalStockItem.save();
     }
     // 3. Appliquer l'impact de la nouvelle vente sur le stock
-    const newStockItem = await Stock.findOne({ name: updatedSaleData.produit });
+    const newStockItem = await Stock.findOne({ id: updatedSaleData.productId });
     if (newStockItem) {
       const stockBeforeUpdate = newStockItem.stock || 0;
       newStockItem.stock -= updatedSaleData.quantity;
@@ -87,9 +87,7 @@ router.put("/:id", async (req, res) => {
         date: updatedSaleData.date,
         change: -updatedSaleData.quantity,
         stockBefore: stockBeforeUpdate,
-        note: updatedSaleData.category === "service" 
-              ? `Vente Service Modifiée : ${updatedSaleData.name} (Vente ${saleId})`
-              : `Vente Modifiée (Vente ${saleId})`
+        note: `Vente Modifiée (Vente ${saleId})`
       });
       await newStockItem.save();
     }
@@ -112,7 +110,7 @@ router.delete("/:id", async (req, res) => {
     const sale = await Sale.findOne({ id: id });
     if (!sale) return res.status(404).json({ message: "Vente non trouvée" });
     // Logique d'annulation de stock
-    const stockItem = await Stock.findOne({ name: sale.produit });
+    const stockItem = await Stock.findOne({ id: sale.productId });
     if (stockItem) {
       const stockBeforeReversal = stockItem.stock || 0;
       stockItem.stock += sale.quantity;

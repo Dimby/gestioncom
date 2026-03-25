@@ -76,27 +76,16 @@ async function renderServices(filter = "") {
   const res = await fetch("/api/services");
   let services = await res.json();
 
-  // Filtre sur le nom, catégorie, produits, types d'impression, formats
+  // Filtre sur le nom, catégorie, ou produit
   if (filter) {
     const f = filter.toLowerCase();
-    services = services.filter(s =>
-      (s.name && s.name.toLowerCase().includes(f)) ||
-      (s.category && s.category.toLowerCase().includes(f)) ||
-      (Array.isArray(s.products) && s.products.some(p => {
-        let label = p.name;
-        if (!label && p.productId) {
-          const prodObj = produits.find(prod => prod.id == p.productId);
-          label = prodObj ? prodObj.name : "";
-        }
-        return label && label.toLowerCase().includes(f);
-      })) ||
-      (Array.isArray(s.impressionType) && s.impressionType.some(t =>
-        t.name && t.name.toLowerCase().includes(f)
-      )) ||
-      (Array.isArray(s.formats) && s.formats.some(fm =>
-        fm.name && fm.name.toLowerCase().includes(f)
-      ))
-    );
+    services = services.filter(s => {
+      const prodObj = produits.find(prod => prod.id == s.produitId);
+      const prodName = prodObj ? prodObj.name : "";
+      return (s.name && s.name.toLowerCase().includes(f)) ||
+             (s.info && s.info.toLowerCase().includes(f)) ||
+             (prodName && prodName.toLowerCase().includes(f));
+    });
   }
 
   // Pagination
@@ -124,24 +113,14 @@ async function renderServices(filter = "") {
   `;
 
   paginated.forEach(s => {
-    // Affichage des produits sous forme de chips
-    const produitsChips = Array.isArray(s.produits) && s.produits.length > 0
-      ? s.produits.map(pid => {
-          // pid peut être un id ou un objet {productId}
-          const id = typeof pid === "object" && pid.productId ? pid.productId : pid;
-          const prodObj = medocsData.find(prod => prod.id == id);
-          const label = prodObj ? prodObj.brand_name : (pid.name || pid);
-          return `<span class="chip">${label || "?"}</span>`;
-        }).join(" ")
-      : "<i>Aucun</i>";
-      const produit = medocsData.find(prod => prod.id == s.produitId);
+    const produit = produits.find(prod => prod.id == s.produitId);
 
     html += `
       <tr data-id="${s.id}">
         <td>${s.name || ""}</td>
-        <td>${produit?.brand_name}</td>
+        <td>${produit?.name || "Produit supprimé"}</td>
         <td>${s.price || ""}</td>
-        <td>${s.info || ""}</td>
+        <td>${s.info || "-"}</td>
         <td style="text-align:center;">
           <span class="action-edit" title="Modifier" style="cursor:pointer;">✏️</span>
           <span class="action-delete" title="Supprimer" style="cursor:pointer;margin-left:8px;">🗑️</span>
@@ -198,6 +177,35 @@ function attachServiceActions(services) {
       modal.style.display = "flex";
 
       // Validation du NOUVEAU formulaire
+      document.getElementById("editServiceFormSimple").onsubmit = async function(e) {
+        e.preventDefault();
+
+        const updated = {
+          name: document.getElementById("editServiceNameSimple").value,
+          produitId: document.getElementById("editServiceProduitSimple").value,
+          price: Number(document.getElementById("editServicePriceSimple").value),
+          info: document.getElementById("editServiceInfoSimple").value || "",
+          category: "service"
+        };
+
+        try {
+            const res = await fetch(`/api/services/${service.id}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(updated)
+            });
+             const result = await res.json();
+             if (!res.ok) throw new Error(result.message || "Erreur serveur");
+
+            alert(result.message || "Service modifié avec succès !");
+            modal.style.display = "none";
+            renderServices(); // Rafraîchir la liste
+
+        } catch(err) {
+             console.error("Erreur lors de la modification du service:", err);
+             alert("Erreur: " + err.message);
+        }
+      };
       document.getElementById("editServiceFormSimple").onsubmit = async function(e) {
         e.preventDefault();
 
@@ -319,25 +327,14 @@ function createSimpleServiceEditModal() {
   `;
   document.body.appendChild(modal);
 
-  // Remplir le select des produits (utilise la variable globale 'produits' ou 'medocsData' selon votre cas)
-  // Assurez-vous que 'medocsData' est bien chargée et contient les produits
+  // Remplir le select des produits
   const selectProduit = document.getElementById('editServiceProduitSimple');
-  if (medocsData && medocsData.length > 0) {
-      medocsData.forEach(prod => {
-          if (prod.id && prod.brand_name) {
-              selectProduit.options.add(new Option(prod.brand_name, prod.id));
+  if (produits && produits.length > 0) {
+      produits.forEach(prod => {
+          if (prod.id && prod.name) {
+              selectProduit.options.add(new Option(prod.name, prod.id));
           }
       });
-  } else {
-      console.warn("medocsData n'est pas disponible pour remplir le select produit du modal.");
-      // Optionnel: Tenter de charger les stocks si medocsData est vide
-      if (produits && produits.length > 0) {
-           produits.forEach(prod => {
-              if (prod.id && prod.name) {
-                  selectProduit.options.add(new Option(prod.name, prod.id));
-              }
-           });
-      }
   }
 
 
