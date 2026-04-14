@@ -379,8 +379,6 @@ function createProductAddModal() {
 
             <input type="number" id="addSale" placeholder="Prix vente" required>
 
-            <input type="number" id="addStock" placeholder="Stock initial" required>
-
             <div style="margin-top:10px">
             <button type="button" id="cancelAddProduct">Annuler</button>
             <button type="submit">Ajouter</button>
@@ -417,7 +415,7 @@ function createProductAddModal() {
     modal.querySelector("#addProductForm").onsubmit = async function(e){
         e.preventDefault();
 
-        const stock = Number(modal.querySelector("#addStock").value);
+        const stock = 0; // On démarre à 0, le stock initial sera géré via l'historique du produit
 
         try {
             const newId = Date.now().toString();
@@ -457,7 +455,6 @@ function createProductAddModal() {
                     note: "Création initiale du produit"
                 }]
             });
-            console.log('values', values)
 
             const res = await fetch("/api/stocks", {
                 method:"POST",
@@ -501,6 +498,65 @@ async function reloadProducts(filter = "") {
   renderProducts(filter);
 }
 
+async function sendOrder() {
+  try {
+    // Récupérer les lignes de commande du modal
+    const rows = document.querySelectorAll("#orderBody tr");
+    
+    if (rows.length === 0) {
+      alert("Veuillez ajouter au moins une ligne à la commande.");
+      return;
+    }
+
+    // Construire le tableau des articles
+    const items = [];
+    for (const tr of rows) {
+      const productId = tr.querySelector(".order-product-select").value;
+      const quantity = Number(tr.querySelector(".order-qty").value);
+
+      if (!productId) {
+        alert("Veuillez sélectionner un produit pour chaque ligne.");
+        return;
+      }
+
+      if (!quantity || quantity <= 0) {
+        alert("Veuillez entrer une quantité valide pour chaque ligne.");
+        return;
+      }
+
+      items.push({
+        productId: productId,
+        quantity: quantity
+      });
+    }
+
+    // Envoyer à l'API
+    const response = await fetch("/api/orders/batch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items: items })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || "Erreur lors de l'envoi de la commande");
+    }
+
+    alert(result.message);
+
+    // Fermer le modal et réinitialiser
+    const modal = document.getElementById("orderModal");
+    modal.style.display = "none";
+    document.getElementById("orderBody").innerHTML = "";
+    document.getElementById("orderTotal").textContent = "0";
+
+  } catch (err) {
+    console.error("Erreur lors de l'envoi de la commande:", err);
+    alert("Erreur : " + err.message);
+  }
+}
+
 function createOrderModal() {
 
   if (document.getElementById("orderModal")) return;
@@ -521,7 +577,7 @@ function createOrderModal() {
   modal.innerHTML = `
     <div style="background:#fff;padding:20px;border-radius:10px;max-height: 730px;
     overflow: auto;">
-      <h3>Simulation commande</h3>
+      <h3>Nouvelle commande</h3>
 
       <table style="width:100%" id="orderTable">
         <thead>
@@ -545,6 +601,7 @@ function createOrderModal() {
       </div>
 
       <div style="margin-top:10px">
+        <button id="sendOrderModal">Confirmer</button>
         <button id="closeOrderModal">Fermer</button>
       </div>
     </div>
@@ -554,6 +611,10 @@ function createOrderModal() {
 
   document.getElementById("closeOrderModal").onclick = () => {
     modal.style.display = "none";
+  };
+
+  document.getElementById("sendOrderModal").onclick = async () => {
+    await sendOrder();
   };
 
   document.getElementById("addOrderLine").onclick = () => {

@@ -1,69 +1,52 @@
 document.addEventListener('DOMContentLoaded', async function() {
-  // Récupérer tous les produits avec leur historique
-  const response = await fetch('/api/stocks');
-  const products = await response.json();
+  // Récupérer les commandes et les produits
+  const ordersResponse = await fetch('/api/orders');
+  const orders = await ordersResponse.json();
+  
+  const productsResponse = await fetch('/api/products');
+  const products = await productsResponse.json();
 
-  // Extraire toutes les dates des historiques et les regrouper
+  // Créer une map des produits pour accès rapide
+  const productsMap = {};
+  products.forEach(p => {
+    productsMap[p.id] = p;
+  });
+
+  // Regrouper les commandes par date
   const dateMap = new Map();
   
-  products.forEach(product => {
-    if (product.history && Array.isArray(product.history)) {
-      product.history.forEach(entry => {
-        // Modification ici: capturer tous types de modifications de stock positives
-        if ((entry.change > 0 && (entry.note === "Création produit" || 
-            entry.note.startsWith("Modification stock") || 
-            entry.note.startsWith("Modification rétroactive"))) ||
-            entry.note === "Commande") {
-          
-          // Formater la date pour l'affichage et le regroupement
-          const date = new Date(entry.date);
-          const month = date.toLocaleString('fr-FR', { month: 'long' });
-          const day = date.getDate();
-          const year = date.getFullYear();
-          
-          const formattedDate = `${month.charAt(0).toUpperCase() + month.slice(1)} - ${day} ${year}`;
-          const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
-          
-          if (!dateMap.has(dateKey)) {
-            dateMap.set(dateKey, {
-              display: formattedDate,
-              entries: []
-            });
-          }
-          
-          // Détermination des prix à afficher pour cette entrée
-          let purchasePrice = product.purchasePrice;
-          let salePrice = product.salePrice;
-          if (entry.priceChange) {
-            purchasePrice = entry.priceChange.newPurchasePrice;
-            salePrice = product.salePrice;
-          }
-          if (entry.salePriceChange) {
-            salePrice = entry.salePriceChange.newSalePrice;
-            purchasePrice = product.purchasePrice;
-          }
-          if (typeof entry.purchasePrice !== "undefined") {
-            purchasePrice = entry.purchasePrice;
-          }
-          if (typeof entry.salePrice !== "undefined") {
-            salePrice = entry.salePrice;
-          }
-
-          // Ajouter cette entrée d'historique avec les infos du produit et les prix corrects
-          dateMap.get(dateKey).entries.push({
-            productId: product.id,
-            productName: product.name,
-            category: product.category,
-            purchasePrice: purchasePrice,
-            salePrice: salePrice,
-            stockChange: entry.change,
-            date: entry.date,
-            entryNote: entry.note,
-            isRetroactive: entry.note.includes("rétroactive")
-          });
-        }
+  orders.forEach(order => {
+    const product = productsMap[order.productId];
+    if (!product) return; // Ignorer si le produit n'existe pas
+    
+    // Formater la date pour l'affichage et le regroupement
+    const date = new Date(order.date);
+    const month = date.toLocaleString('fr-FR', { month: 'long' });
+    const day = date.getDate();
+    const year = date.getFullYear();
+    
+    const formattedDate = `${month.charAt(0).toUpperCase() + month.slice(1)} - ${day} ${year}`;
+    const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
+    
+    if (!dateMap.has(dateKey)) {
+      dateMap.set(dateKey, {
+        display: formattedDate,
+        entries: []
       });
     }
+    
+    // Ajouter cette commande avec les infos du produit
+    dateMap.get(dateKey).entries.push({
+      orderId: order.id,
+      productId: product.id,
+      productName: product.brand_name || "N/A",
+      supplier: product.supplier || "-",
+      pieces: product.pieces || "-",
+      purchaseTotalPrice: order.purchaseTotalPrice || 0,
+      quantity: order.quantity,
+      date: order.date,
+      status: order.status
+    });
   });
   
   // Convertir la Map en tableau et trier par date (la plus récente en premier)
@@ -79,7 +62,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     dateSelector.appendChild(option);
   });
   
-  // Ajoutons des structures pour gérer la navigation par mois
+  // Structures pour la navigation par mois
   let currentMonthIndex = 0;
   let availableMonths = [];
   
@@ -152,10 +135,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   }
   
-  // Après avoir rempli le sélecteur de dates et avant de sélectionner la date par défaut
+  // Extraire les mois disponibles et initialiser
   availableMonths = extractAvailableMonths(sortedDates);
   
-  // Ajouter les gestionnaires d'événements pour les boutons de navigation par mois
+  // Gestionnaires d'événements pour les boutons de navigation par mois
   document.getElementById('prevMonth').addEventListener('click', function() {
     if (currentMonthIndex < availableMonths.length - 1) {
       currentMonthIndex++;
@@ -186,130 +169,57 @@ document.addEventListener('DOMContentLoaded', async function() {
     const dateData = dateMap.get(dateKey);
     document.getElementById('orderDateTitle').textContent = `Commandes [${dateData.display}]`;
     
-    let totalPurchase = 0, totalSale = 0, totalDiff = 0;
+    let totalPrice = 0;
 
+    // Trier les entrées par nom de produit
     dateData.entries.sort((a, b) => a.productName.localeCompare(b.productName));
 
     dateData.entries.forEach((entry, index) => {
-      const purchaseTotal = entry.purchasePrice * entry.stockChange;
-      const saleTotal = entry.salePrice * entry.stockChange;
-      const diff = saleTotal - purchaseTotal;
-      
-      totalPurchase += purchaseTotal;
-      totalSale += saleTotal;
-      totalDiff += diff;
+      const lineTotal = entry.purchaseTotalPrice * entry.quantity;
+      totalPrice += lineTotal;
       
       const row = document.createElement('tr');
-      if (entry.isRetroactive) row.classList.add('retroactive-entry');
       
       row.innerHTML = `
         <td>${index + 1}</td>
         <td>${entry.productName}</td>
-        <td>${entry.category}</td>
-        <td>${entry.purchasePrice.toLocaleString()} Ar</td>
-        <td>${entry.salePrice.toLocaleString()} Ar</td>
-        <td>${entry.stockChange}</td>
-        <td>${purchaseTotal.toLocaleString()} Ar</td>
-        <td>${saleTotal.toLocaleString()} Ar</td>
-        <td>${diff.toLocaleString()} Ar</td>
+        <td>${entry.supplier}</td>
+        <td>${entry.pieces}</td>
+        <td>${entry.purchaseTotalPrice.toLocaleString()} Ar</td>
+        <td>${entry.quantity}</td>
+        <td>${lineTotal.toLocaleString()} Ar</td>
         <td style="text-align:center;">
-          <span class="action-edit" title="Modifier" style="cursor:pointer;" 
-                data-id="${entry.productId}" data-date="${entry.date}">✏️</span>
-          <span class="action-delete" title="Supprimer" style="cursor:pointer;margin-left:8px;" 
-                data-id="${entry.productId}" data-date="${entry.date}">🗑️</span>
+          <span class="action-delete" title="Supprimer" style="cursor:pointer;" 
+                data-id="${entry.orderId}">🗑️</span>
         </td>
       `;
       tableBody.appendChild(row);
     });
     
-    document.getElementById('totalPurchase').textContent = `${totalPurchase.toLocaleString()} Ar`;
-    document.getElementById('totalSale').textContent = `${totalSale.toLocaleString()} Ar`;
-    document.getElementById('totalDiff').textContent = `${totalDiff.toLocaleString()} Ar`;
+    document.getElementById('totalPrice').textContent = `${totalPrice.toLocaleString()} Ar`;
 
-    initActionButtons(dateKey);
+    initActionButtons(dateKey, dateData);
   }
 
-  // Initialisation du Modal (Copie adaptée de listStocks.js)
-function createEditModal() {
-  if (document.getElementById("editModal")) return;
-  const modal = document.createElement("div");
-  modal.id = "editModal";
-  modal.style = "display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000;";
-  modal.innerHTML = `
-    <div style="background:#fff; padding:20px; border-radius:8px; width:350px;">
-      <h3>Modifier la commande</h3>
-      <form id="editOrderForm">
-        <label>Quantité ajoutée</label>
-        <input type="number" id="editQty" required style="width:100%; margin-bottom:10px;">
-        <label>Prix d'achat unitaire</label>
-        <input type="number" id="editPurch" required style="width:100%; margin-bottom:10px;">
-        <label>Prix de vente unitaire</label>
-        <input type="number" id="editSale" required style="width:100%; margin-bottom:20px;">
-        <div style="display:flex; gap:10px;">
-          <button type="submit" style="flex:1; background:#2ecc71; color:white; border:none; padding:10px; border-radius:4px;">Enregistrer</button>
-          <button type="button" id="closeModal" style="flex:1; background:#e74c3c; color:white; border:none; padding:10px; border-radius:4px;">Annuler</button>
-        </div>
-      </form>
-    </div>
-  `;
-  document.body.appendChild(modal);
-}
-
-function initActionButtons(dateKey) {
-  createEditModal();
-
-  // LOGIQUE DE SUPPRESSION
-  document.querySelectorAll(".action-delete").forEach(btn => {
-    btn.onclick = async function() {
-      const id = this.getAttribute("data-id");
-      const date = this.getAttribute("data-date");
-      if (confirm("Supprimer cette entrée ? Cela impactera le stock actuel.")) {
-        const res = await fetch(`/api/stocks/${id}/history/entry`, { 
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ date: date })
-        });
-        if (res.ok) window.location.reload();
-      }
-    };
-  });
-
-  // LOGIQUE DE MODIFICATION
-  document.querySelectorAll(".action-edit").forEach(btn => {
-    btn.onclick = function() {
-      const id = this.getAttribute("data-id");
-      const date = this.getAttribute("data-date");
-      const entry = dateMap.get(dateKey).entries.find(e => e.productId === id && e.date === date);
-
-      document.getElementById("editQty").value = entry.stockChange;
-      document.getElementById("editPurch").value = entry.purchasePrice;
-      document.getElementById("editSale").value = entry.salePrice;
-      document.getElementById("editModal").style.display = "flex";
-
-      document.getElementById("editOrderForm").onsubmit = async (e) => {
-        e.preventDefault();
-        const updatedEntry = {
-          date: date,
-          newQty: Number(document.getElementById("editQty").value),
-          newPurch: Number(document.getElementById("editPurch").value),
-          newSale: Number(document.getElementById("editSale").value)
-        };
-
-        const res = await fetch(`/api/stocks/${id}/history/entry`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedEntry)
-        });
-
-        if (res.ok) window.location.reload();
+  function initActionButtons(dateKey, dateData) {
+    // LOGIQUE DE SUPPRESSION
+    document.querySelectorAll(".action-delete").forEach(btn => {
+      btn.onclick = async function() {
+        const orderId = this.getAttribute("data-id");
+        if (confirm("Supprimer cette commande ?")) {
+          const res = await fetch(`/api/orders/${orderId}`, { 
+            method: "DELETE"
+          });
+          if (res.ok) {
+            alert("Commande supprimée !");
+            window.location.reload();
+          } else {
+            alert("Erreur lors de la suppression");
+          }
+        }
       };
-    };
-  });
-
-  document.getElementById("closeModal").onclick = () => {
-    document.getElementById("editModal").style.display = "none";
-  };
-}
+    });
+  }
   
   // Sélectionner la date la plus récente par défaut (si disponible)
   if (sortedDates.length > 0) {
@@ -322,30 +232,6 @@ function initActionButtons(dateKey) {
   dateSelector.addEventListener('change', function() {
     updateOrdersTable(this.value);
   });
-  
-  // Ajouter un style CSS pour les modifications rétroactives
-  const style = document.createElement('style');
-  style.textContent = `
-    .retroactive-entry {
-      background-color: #fff8e1; /* fond légèrement jaune */
-    }
-    .retroactive-indicator {
-      color: #FF6B00;
-      margin-right: 8px;
-      font-size: 1.1em;
-      cursor: help;
-    }
-    .note {
-      font-size: 0.8em;
-      color: #555;
-      display: none; /* cacher les notes par défaut */
-    }
-    td:hover .note {
-      display: inline; /* afficher au survol */
-      margin-left: 5px;
-    }
-  `;
-  document.head.appendChild(style);
   
   // Gestionnaire pour le bouton d'export Excel
   document.getElementById('exportExcel').addEventListener('click', function() {
@@ -367,55 +253,50 @@ function initActionButtons(dateKey) {
     excelData.push([]); // Ligne vide pour l'espacement
     
     // Ajouter les en-têtes
-    excelData.push(['Numéro', 'Designation', 'Quantité', 'Prix de vente', 'Total']);
+    excelData.push(['Numéro', 'Produit', 'Fournisseur', 'Pièces', 'Prix Global', 'Quantité', 'Total']);
     
     // Trier alphabétiquement pour l'export Excel
     dateData.entries.sort((a, b) => a.productName.localeCompare(b.productName));
     
     // Ajouter les données
-    let totalSale = 0;
+    let totalPrice = 0;
     dateData.entries.forEach((entry, index) => {
-      const lineTotal = entry.salePrice * entry.stockChange;
-      totalSale += lineTotal;
+      const lineTotal = entry.purchaseTotalPrice * entry.quantity;
+      totalPrice += lineTotal;
       
       excelData.push([
         index + 1,
         entry.productName,
-        entry.stockChange,
-        // Format avec séparateur de milliers
-        entry.salePrice.toLocaleString('fr-FR'),
-        // Format avec séparateur de milliers
-        lineTotal.toLocaleString('fr-FR')
+        entry.supplier,
+        entry.pieces,
+        entry.purchaseTotalPrice,
+        entry.quantity,
+        lineTotal
       ]);
     });
     
     // Ajouter le total
     excelData.push([]); // Ligne vide
-    excelData.push(['', '', '', 'TOTAL', totalSale.toLocaleString('fr-FR')]);
+    excelData.push(['', '', '', '', '', 'TOTAL', totalPrice]);
     
     // Créer une feuille de calcul
     const ws = XLSX.utils.aoa_to_sheet(excelData);
     
     // Mise en forme des cellules (fusion, style, etc.)
     ws['!merges'] = [
-      { s: { r: 0, c: 0 }, e: { r: 0, c: 4 } } // Fusionner le titre sur 5 colonnes
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 6 } } // Fusionner le titre sur 7 colonnes
     ];
     
     // Ajuster la largeur des colonnes
     ws['!cols'] = [
-      { wch: 10 }, // Largeur colonne Numéro
-      { wch: 30 }, // Largeur colonne Désignation
-      { wch: 10 }, // Largeur colonne Quantité
-      { wch: 15 }, // Largeur colonne Prix
-      { wch: 15 }  // Largeur colonne Total
+      { wch: 10 }, // Numéro
+      { wch: 30 }, // Produit
+      { wch: 20 }, // Fournisseur
+      { wch: 12 }, // Pièces
+      { wch: 15 }, // Prix Global
+      { wch: 12 }, // Quantité
+      { wch: 15 }  // Total
     ];
-    
-    // Alignement à droite pour la dernière ligne (total général)
-    if (!ws['!types']) ws['!types'] = [];
-    const lastRowIndex = excelData.length - 1;
-    const totalCellRef = XLSX.utils.encode_cell({r: lastRowIndex, c: 4}); // Colonne E, dernière ligne
-    if (!ws[totalCellRef]) ws[totalCellRef] = {};
-    ws[totalCellRef].s = { alignment: { horizontal: "right" } };
     
     // Créer un classeur et ajouter la feuille
     const wb = XLSX.utils.book_new();

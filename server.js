@@ -17,6 +17,7 @@ const servicesRoutes = require("./routes/services");
 const adminRoutes = require("./routes/admin");
 const bestsellersRoutes = require("./routes/bestsellers");
 const movementsRoutes = require("./routes/movements");
+const ordersRoutes = require("./routes/orders");
 
 // Initialisation d'Express
 const app = express();
@@ -57,6 +58,7 @@ app.use("/api", adminRoutes);  // Routes d'authentification et admin
 app.use("/admin", adminRoutes); // Pages admin
 app.use("/api/bestsellers", bestsellersRoutes);
 app.use("/api/movements", movementsRoutes);
+app.use("/api/orders", ordersRoutes);
 
 // SUPPRESSION des routes /download-db et /import-db 
 // qui étaient en conflit avec admin.js et notre nouvelle logique.

@@ -38,7 +38,12 @@
     {
       "id": "1755179443155",
       "brand_name": "RAM papier - Double A",
-      "generic_name": "office_paper"
+      "generic_name": "office_paper",
+      "pieces": 0,
+      "supplier": "",
+      "purchasePrice": 0,
+      "salePrice": 0,
+      "purchaseTotalPrice": 0
     },
     {
       "id": "1755179443156",
@@ -108,7 +113,12 @@
     {
       "id": "1755179443167",
       "brand_name": "Bloc Note Petit - Fotsy (TATAMAX)",
-      "generic_name": "notepad"
+      "generic_name": "notepad",
+      "pieces": "1 pieces (1000/10)",
+      "supplier": "TATAMAX",
+      "purchasePrice": 1500,
+      "salePrice": 2000,
+      "purchaseTotalPrice": 1500
     },
     {
       "id": "1755179443168",
@@ -168,7 +178,12 @@
     {
       "id": "1755179443176",
       "brand_name": "Barnadaire",
-      "generic_name": "supplies"
+      "generic_name": "supplies",
+      "pieces": "10 pièces",
+      "supplier": "TATAMAX",
+      "purchasePrice": 750,
+      "salePrice": 1000,
+      "purchaseTotalPrice": 7500
     },
     {
       "id": "1755179443177",
@@ -253,7 +268,12 @@
     {
       "id": "1755179443191",
       "brand_name": "Stylo 4 couleurs (TATAMAX)",
-      "generic_name": "supplies"
+      "generic_name": "supplies",
+      "pieces": "1 pièces",
+      "supplier": "TATAMAX",
+      "purchasePrice": 2000,
+      "salePrice": 2500,
+      "purchaseTotalPrice": 2000
     },
     {
       "id": "1755179443192",
@@ -268,7 +288,12 @@
     {
       "id": "1755179443194",
       "brand_name": "Taille Crayon",
-      "generic_name": "supplies"
+      "generic_name": "supplies",
+      "pieces": "1 pieces (1500/10)",
+      "supplier": "TATAMAX",
+      "purchasePrice": 1500,
+      "salePrice": 2000,
+      "purchaseTotalPrice": 1500
     },
     {
       "id": "1755179443195",
@@ -280,7 +305,7 @@
       "brand_name": "Stylo Laureat 200",
       "generic_name": "supplies",
       "pieces": "50 pièces",
-      "supplier": "MAGEMAD Tsaralalana",
+      "supplier": "MAGEMAD/COMIEX Tsaralalana",
       "purchasePrice": 332,
       "salePrice": 600,
       "purchaseTotalPrice": 16600
@@ -288,7 +313,12 @@
     {
       "id": "1755179443197",
       "brand_name": "Bloc note Cute Limit - Tatamax",
-      "generic_name": "supplies"
+      "generic_name": "supplies",
+      "pieces": "1 pieces (3000/4)",
+      "supplier": "TATAMAX",
+      "purchasePrice": 3000,
+      "salePrice": 5000,
+      "purchaseTotalPrice": 3000
     },
     {
       "id": "1770716575711",
@@ -423,7 +453,12 @@
     {
       "id": "1770717394548",
       "brand_name": "Stylo Assorti 10 couleurs",
-      "generic_name": "supplies"
+      "generic_name": "supplies",
+      "pieces": "1 pièce",
+      "supplier": "TATAMAX",
+      "purchasePrice": 2000,
+      "salePrice": 3000,
+      "purchaseTotalPrice": 2000
     },
     {
       "id": "1772029120622",
@@ -438,7 +473,12 @@
     {
       "id": "1772029386469",
       "brand_name": "Colle Papier Baton",
-      "generic_name": "supplies"
+      "generic_name": "supplies",
+      "pieces": "12 pièces",
+      "supplier": "ESHAQUI",
+      "purchasePrice": 800,
+      "salePrice": 2000,
+      "purchaseTotalPrice": 9600
     },
     {
       "id": "1773163593253",
@@ -473,7 +513,12 @@
     {
       "id": "1773163845203",
       "brand_name": "Bloc Note Lehibe VAOVAO TATAMAX",
-      "generic_name": "notepad"
+      "generic_name": "notepad",
+      "pieces": "1 pieces (4500/4)",
+      "supplier": "TATAMAX",
+      "purchasePrice": 4500,
+      "salePrice": 6000,
+      "purchaseTotalPrice": 4500
     },
     {
       "id": "1774023129165",
@@ -490,7 +535,7 @@
       "brand_name": "Blanco WHITE SHARK",
       "generic_name": "supplies",
       "pieces": "12 pièces",
-      "supplier": "supplies",
+      "supplier": "MAGEMAD Tsaralalana",
       "purchasePrice": 791,
       "salePrice": 1500,
       "purchaseTotalPrice": 9500
@@ -503,6 +548,45 @@
       "supplier": "supplies",
       "purchasePrice": 0,
       "salePrice": 0
+    },
+    {
+      "id": "1774430756404",
+      "brand_name": "Trousse",
+      "generic_name": "supplies",
+      "pieces": "1 piece",
+      "supplier": "supplies",
+      "purchasePrice": 12000,
+      "salePrice": 18000
+    },
+    {
+      "id": "1776163525619",
+      "brand_name": "Bloc note Cute Limit Ngeza",
+      "generic_name": "notepad",
+      "pieces": "1 piece",
+      "supplier": "notepad",
+      "purchasePrice": 4000,
+      "salePrice": 6000,
+      "purchaseTotalPrice": 4000
+    },
+    {
+      "id": "1776163739473",
+      "brand_name": "Stylo Assorti 8 couleurs",
+      "generic_name": "supplies",
+      "pieces": "1 piece (2500x4)",
+      "supplier": "supplies",
+      "purchasePrice": 2500,
+      "salePrice": 3000,
+      "purchaseTotalPrice": 2500
+    },
+    {
+      "id": "1776164229540",
+      "brand_name": "Classeur",
+      "generic_name": "supplies",
+      "pieces": "1 piece (10p min)",
+      "supplier": "supplies",
+      "purchasePrice": 1300,
+      "salePrice": 2500,
+      "purchaseTotalPrice": 13000
     }
   ]
 }

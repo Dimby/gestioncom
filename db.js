@@ -39,9 +39,19 @@ async function readDb() {
      console.log("Initialisation d'une nouvelle base de données (db.enc)...");
      data = {
       items: [], sales: [], stocks: [], services: [],
-      historyImport: [], movements: [], signature: ""
+      historyImport: [], movements: [], orders: [], signature: ""
     };
     await dbInstance.write(data);
+  } else {
+    // S'assurer que tous les tableaux existent (compatibilité avec anciennes données)
+    if (!data.items) data.items = [];
+    if (!data.sales) data.sales = [];
+    if (!data.stocks) data.stocks = [];
+    if (!data.services) data.services = [];
+    if (!data.historyImport) data.historyImport = [];
+    if (!data.movements) data.movements = [];
+    if (!data.orders) data.orders = [];
+    if (!data.signature) data.signature = "";
   }
   return data;
 }
