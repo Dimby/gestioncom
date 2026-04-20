@@ -362,7 +362,7 @@ $(document).ready(async function() {
           <select class="expense-type" required>
             <option value="">Type de mouvement</option>
             <option value="spent">Dépense</option>
-            <option value="disburse">Décaissement</option>
+            <option value="disburse">Commande</option>
           </select>
           <input type="text" class="expense-description" placeholder="Description" required>
           <input type="number" class="expense-price" min="0" placeholder="Montant" required>
@@ -425,7 +425,7 @@ $(document).ready(async function() {
                 <select class="expense-type" required>
                   <option value="">Type de mouvement</option>
                   <option value="spent">Dépense</option>
-                  <option value="disburse">Décaissement</option>
+                  <option value="disburse">Commande</option>
                 </select>
                 <input type="text" class="expense-description" placeholder="Description" required>
                 <input type="number" class="expense-price" min="0" placeholder="Montant" required>

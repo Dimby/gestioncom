@@ -504,7 +504,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (!aggregated[dateKey]) {
           aggregated[dateKey] = {
             spent: 0, // Dépenses
-            disburse: 0, // Décaissements
+            disburse: 0, // Commandes
             date: dateKey // Garder la date pour le tri
           };
         }
@@ -852,7 +852,7 @@ async function getAggregatedMovements() {
       if (!aggregated[dateKey]) {
         aggregated[dateKey] = {
           spent: 0, // Dépenses
-          disburse: 0, // Décaissements
+          disburse: 0, // Commandes
           date: dateKey // Garder la date pour le tri
         };
       }

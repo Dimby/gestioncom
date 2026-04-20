@@ -551,7 +551,7 @@ async function renderMouvementsTable() {
 
       paginatedMovements.forEach(movement => {
         const dateFormatee = formatDate(movement.date);
-        const typeAffiche = movement.type === "spent" ? "Dépense" : "Décaissement";
+        const typeAffiche = movement.type === "spent" ? "Dépense" : "Commande";
         const moveId = movement.id || "";
 
         const tr = document.createElement("tr");
@@ -1213,7 +1213,7 @@ function createMovementEditModal() {
             
             <select id="edit-mov-type" required style="padding: 8px;">
                 <option value="spent">Dépense</option>
-                <option value="disburse">Décaissement</option>
+                <option value="disburse">Commande</option>
             </select>
 
             <input type="text" id="edit-mov-description" placeholder="Description" required style="padding: 8px;">
