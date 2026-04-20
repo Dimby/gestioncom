@@ -147,6 +147,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     let totalRecettes = 0;
     let totalDepenses = 0;
+    let totalDisburse = 0;
     let totalSolde = 0;
     let totalDecaissement = 0;
     let soldeFinale = 0;
@@ -176,7 +177,9 @@ document.addEventListener('DOMContentLoaded', async function() {
       const dayKey = formatDateKey(day);
       const dayMovements = aggregatedMovements[dayKey] || { spent: 0, disburse: 0 };
       const dayDepenses = dayMovements.spent || 0;
+      const dayDisburse = dayMovements.disburse || 0;
       totalDepenses += dayDepenses;
+      totalDisburse += dayDisburse;
       const dayDecaissement = dayMovements.disburse || 0;
       totalDecaissement += dayDecaissement;
 
@@ -193,6 +196,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         <td>${formatAriary(dayReport)}</td>
         <td>${formatAriary(dayRecettes)}</td>
         <td>${formatAriary(dayDepenses)}</td>
+        <td>${formatAriary(dayDisburse)}</td>
         <td>${formatAriary(daySolde)}</td>
         <td>
           [${formatAriary(marginData.product)} + ${formatAriary(marginData.service)}]
@@ -222,6 +226,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     if (document.getElementById('totalRecettes')) document.getElementById('totalRecettes').textContent = formatAriary(totalRecettes);
     if (document.getElementById('totalDepenses')) document.getElementById('totalDepenses').textContent = formatAriary(totalDepenses);
+    if (document.getElementById('totalDisburse')) document.getElementById('totalDisburse').textContent = formatAriary(totalDisburse);
     if (document.getElementById('totalSolde')) document.getElementById('totalSolde').textContent = formatAriary(totalSolde);
     if (document.getElementById('totalDecaissement')) document.getElementById('totalDecaissement').textContent = formatAriary(totalDecaissement);
     if (document.getElementById('soldeFinale')) document.getElementById('soldeFinale').textContent = formatAriary(soldeFinale);
@@ -361,6 +366,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       summaryTableBody.innerHTML = '';
       let totalRecettes = 0;
       let totalDepenses = 0;
+      let totalDisburse = 0;
       let totalMargin = 0;
       let lastSolde = 0;
       for (let i = 0; i < weeks.length; i++) {
@@ -370,6 +376,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         const weeklySummary = calculateWeeklySummary(week.start, week.end); 
         totalRecettes += weeklySummary.recettes;
         totalDepenses += weeklySummary.depenses;
+        totalDisburse += weeklySummary.disburse;
         totalMargin += weeklySummary.margin;
         lastSolde = weeklySummary.solde;
         const row = document.createElement('tr');
@@ -382,6 +389,7 @@ document.addEventListener('DOMContentLoaded', async function() {
           <td>${formatAriary(weeklySummary.report)}</td>
           <td>${formatAriary(weeklySummary.recettes)}</td>
           <td>${formatAriary(weeklySummary.depenses)}</td>
+          <td>${formatAriary(weeklySummary.disburse)}</td>
           <td style="color:`+colorSolde+`">${formatAriary(weeklySummary.solde)}</td>
           <td>${formatAriary(weeklySummary.margin)}</td>
         `;
@@ -389,6 +397,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       }
       document.getElementById('totalRecapRecettes').textContent = formatAriary(totalRecettes);
       document.getElementById('totalRecapDepenses').textContent = formatAriary(totalDepenses);
+      document.getElementById('totalRecapDisburse').textContent = formatAriary(totalDisburse);
       document.getElementById('totalRecapSolde').textContent = formatAriary(lastSolde);
       document.getElementById('totalRecapMargin').textContent = formatAriary(totalMargin);
       const totalSoldeElement = document.getElementById('totalRecapSolde');
@@ -407,7 +416,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     let totalMargin = 0;
     let totalRecettes = 0;
     let totalDepenses = 0;
-    let totalDecaissements = 0;
+    let totalDisburse = 0;
     let initialReport = 0;
     const previousWeekEndDate = new Date(startDate);
     previousWeekEndDate.setDate(previousWeekEndDate.getDate() - 1);
@@ -430,15 +439,16 @@ document.addEventListener('DOMContentLoaded', async function() {
       const dayKey = formatDateKey(currentDay);
       const dayMovements = aggregatedMovements[dayKey] || { spent: 0, disburse: 0 };
       totalDepenses += dayMovements.spent || 0;
-      totalDecaissements += dayMovements.disburse || 0;
+      totalDisburse += dayMovements.disburse || 0;
       currentDay.setDate(currentDay.getDate() + 1);
       totalMargin += calculateDayMargin(currentDay).total;
     }
-    const solde = initialReport + totalRecettes - totalDepenses - totalDecaissements;
+    const solde = initialReport + totalRecettes - totalDepenses - totalDisburse;
     return {
       report: initialReport,
       recettes: totalRecettes,
       depenses: totalDepenses,
+      disburse: totalDisburse,
       solde: solde,
       margin: totalMargin
     };
