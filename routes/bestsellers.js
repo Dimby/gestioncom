@@ -9,35 +9,32 @@ router.get("/", async (req, res) => { // <-- MODIFIÉ (async)
     const data = await readDb(); // <-- MODIFIÉ
     const sales = data.sales || [];
     const stocks = data.stocks || [];
-    
-    // Le reste de votre logique de calcul est correcte
-    const stockDict = {};
+    const stockById = {};
+    const stockByName = {};
     stocks.forEach(product => {
-      stockDict[product.name] = {
-        category: product.category || 'Non catégorisé',
-        stock: product.stock || 0,
-        unitPrice: product.salePrice || 0
-      };
+      stockById[String(product.id)] = product;
+      stockByName[product.name] = product;
     });
     const productSales = {};
     sales.forEach(sale => {
-      if (!sale.produit) return;
-      const productName = sale.produit;
+      if (!sale.produit && sale.stockId == null) return;
+      const stockItem = (sale.stockId != null && stockById[String(sale.stockId)])
+        || stockByName[sale.produit];
+      const key = stockItem ? String(stockItem.id) : (sale.stockId != null ? String(sale.stockId) : sale.produit);
       const quantity = sale.quantity || 1;
-      if (!productSales[productName]) {
-        const stockInfo = stockDict[productName] || { category: 'Non catégorisé', stock: 0, unitPrice: 0 };
-        productSales[productName] = {
-          name: productName,
+      if (!productSales[key]) {
+        productSales[key] = {
+          name: stockItem ? stockItem.name : sale.produit,
           totalQuantity: 0,
           totalRevenue: 0,
-          category: stockInfo.category,
-          stock: stockInfo.stock,
-          unitPrice: stockInfo.unitPrice
+          category: (stockItem && stockItem.category) || 'Non catégorisé',
+          stock: stockItem ? (stockItem.stock || 0) : 0,
+          unitPrice: stockItem ? (stockItem.salePrice || 0) : 0
         };
       }
-      productSales[productName].totalQuantity += quantity;
+      productSales[key].totalQuantity += quantity;
       const price = sale.unitPrice || sale.salePrice || 0;
-      productSales[productName].totalRevenue += quantity * price;
+      productSales[key].totalRevenue += quantity * price;
     });
     let bestsellers = Object.values(productSales).sort((a, b) => b.totalQuantity - a.totalQuantity);
     res.json(bestsellers);

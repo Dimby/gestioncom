@@ -1,21 +1,19 @@
 // Fichier: routes/services.js
 const express = require("express");
-const { readDb, writeDb } = require("../db"); // <-- MODIFIÉ
+const { readDb, updateDb } = require("../db");
 
 const router = express.Router();
 
-// Route GET (tous les services)
-router.get("/", async (req, res) => { // <-- MODIFIÉ (async)
+router.get("/", async (req, res) => {
   try {
-    const data = await readDb(); // <-- MODIFIÉ
+    const data = await readDb();
     res.json(data.services || []);
   } catch (e) {
     res.status(500).json({ message: "Erreur serveur: " + e.message });
   }
 });
 
-// Route POST (ajout service)
-router.post("/", async (req, res) => { // <-- MODIFIÉ (async)
+router.post("/", async (req, res) => {
   try {
     const service = req.body;
     if (
@@ -24,54 +22,57 @@ router.post("/", async (req, res) => { // <-- MODIFIÉ (async)
     ) {
       return res.status(400).json({ message: "Champs requis manquants ou invalides." });
     }
-    
+
     service.id = Date.now();
     service.category = "service";
-    
-    const data = await readDb(); // <-- MODIFIÉ
-    data.services = data.services || [];
-    data.services.push(service); // <-- MODIFIÉ
-    await writeDb(data); // <-- MODIFIÉ
-    
+
+    await updateDb((data) => {
+      data.services = data.services || [];
+      data.services.push(service);
+    });
+
     res.json({ message: "Service enregistré !" });
   } catch (e) {
     res.status(500).json({ message: "Erreur serveur: " + e.message });
   }
 });
 
-// Route PUT (modification service)
-router.put("/:id", async (req, res) => { // <-- MODIFIÉ (async)
+router.put("/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
     const updatedServiceData = req.body;
-    
-    const data = await readDb(); // <-- MODIFIÉ
-    const index = data.services.findIndex(s => s.id === id);
-    
-    if (index === -1) return res.status(404).json({ message: "Service non trouvé." });
-    
-    // Fusionner l'ancien objet avec les nouvelles données
-    data.services[index] = { ...data.services[index], ...updatedServiceData }; // <-- MODIFIÉ
-    
-    await writeDb(data); // <-- MODIFIÉ
+
+    const result = await updateDb((data) => {
+      const index = data.services.findIndex(s => s.id === id);
+      if (index === -1) return { notFound: true };
+      data.services[index] = { ...data.services[index], ...updatedServiceData };
+      return { notFound: false };
+    });
+
+    if (result && result.notFound) {
+      return res.status(404).json({ message: "Service non trouvé." });
+    }
+
     res.json({ message: "Service modifié." });
   } catch (e) {
     res.status(500).json({ message: "Erreur serveur: " + e.message });
   }
 });
 
-// Route DELETE (suppression service)
-router.delete("/:id", async (req, res) => { // <-- MODIFIÉ (async)
+router.delete("/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
-    const data = await readDb(); // <-- MODIFIÉ
-    
-    const index = data.services.findIndex(s => s.id === id);
-    if (index === -1) return res.status(404).json({ message: "Service non trouvé." });
-    
-    data.services.splice(index, 1); // <-- MODIFIÉ
-    
-    await writeDb(data); // <-- MODIFIÉ
+    const result = await updateDb((data) => {
+      const index = data.services.findIndex(s => s.id === id);
+      if (index === -1) return { notFound: true };
+      data.services.splice(index, 1);
+      return { notFound: false };
+    });
+
+    if (result && result.notFound) {
+      return res.status(404).json({ message: "Service non trouvé." });
+    }
+
     res.json({ message: "Service supprimé." });
   } catch (e) {
     res.status(500).json({ message: "Erreur serveur: " + e.message });

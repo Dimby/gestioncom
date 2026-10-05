@@ -1,10 +1,37 @@
 document.addEventListener("DOMContentLoaded", () => {
   renderServices();
 
+  document.getElementById("newService")?.addEventListener("click", openServiceCreateModal);
+
   document.getElementById("searchInput").addEventListener("input", function() {
     renderServices(this.value);
   });
 });
+
+function openServiceCreateModal() {
+  let modal = document.getElementById("addServiceModal");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "addServiceModal";
+    modal.style.cssText = "display:none;position:fixed;z-index:1000;inset:0;background:rgba(0,0,0,.5);justify-content:center;align-items:center";
+    modal.innerHTML = `<div style="background:#fff;padding:20px;border-radius:10px;width:420px"><h3 style="margin-top: 0">Ajouter un nouveau service</h3><form id="serviceForm"><label>Nom du service<input id="serviceName" required></label><label>Produit utilisé<select id="serviceProduit" required><option value="">Sélectionner un produit</option></select></label><label>Prix de service<input type="number" min="0" id="servicePrice" required></label><label>Information utile (facultatif)<input id="serviceInfo"></label><p style="margin-bottom: 0;display: flex;gap: 10px;"><button type="button" id="cancelAddService">Annuler</button><button type="submit">Enregistrer le service</button></p></form></div>`;
+    document.body.appendChild(modal);
+    modal.querySelector("#cancelAddService").onclick = () => modal.style.display = "none";
+    modal.onclick = e => { if (e.target === modal) modal.style.display = "none"; };
+    modal.querySelector("#serviceForm").onsubmit = async e => {
+      e.preventDefault();
+      const service = { name: serviceName.value.trim(), produitId: serviceProduit.value, price: Number(servicePrice.value), info: serviceInfo.value.trim() };
+      const res = await fetch("/api/services", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(service) });
+      const result = await res.json();
+      if (!res.ok) return alert(result.message || "Erreur lors de l'enregistrement.");
+      modal.style.display = "none"; renderServices();
+    };
+  }
+  const select = modal.querySelector("#serviceProduit");
+  select.innerHTML = '<option value="">Sélectionner un produit</option>';
+  medocsData.forEach(product => select.add(new Option(product.brand_name, product.id)));
+  modal.style.display = "flex";
+}
 
 let produits = [];
 fetch("/api/stocks")
@@ -14,10 +41,10 @@ fetch("/api/stocks")
   });
 
 let medocsData = [];
-fetch("/medocs.json")
+fetch("/produits.js")
   .then(res => res.json())
   .then(data => {
-    medocsData = data.medicines || [];
+    medocsData = data.produits || [];
   });
 
 let currentPage = 1;

@@ -10,6 +10,34 @@ const DB_FILE_JSON = path.join(process.cwd(), 'db.json');
 
 const dbInstance = new EncryptedJSONFile(DB_FILE_ENC, DB_SECRET);
 
+// File d'attente : une seule lecture/écriture à la fois (évite d'écraser une vente).
+let dbQueue = Promise.resolve();
+
+function withDbLock(fn) {
+  const run = dbQueue.then(fn, fn);
+  dbQueue = run.then(() => undefined, () => undefined);
+  return run;
+}
+
+function emptyDb() {
+  return {
+    items: [], sales: [], stocks: [], services: [],
+    historyImport: [], movements: [], orders: [], signature: ""
+  };
+}
+
+function ensureCollections(data) {
+  if (!data.items) data.items = [];
+  if (!data.sales) data.sales = [];
+  if (!data.stocks) data.stocks = [];
+  if (!data.services) data.services = [];
+  if (!data.historyImport) data.historyImport = [];
+  if (!data.movements) data.movements = [];
+  if (!data.orders) data.orders = [];
+  if (!data.signature) data.signature = "";
+  return data;
+}
+
 // Au démarrage, migrer db.json vers db.enc si db.json existe et db.enc n'existe pas
 (async () => {
   if (fs.existsSync(DB_FILE_JSON) && !fs.existsSync(DB_FILE_ENC)) {
@@ -28,32 +56,25 @@ const dbInstance = new EncryptedJSONFile(DB_FILE_ENC, DB_SECRET);
   }
 })();
 
+async function readDbUnlocked() {
+  let data = await dbInstance.read();
+  if (!data) {
+     console.log("Initialisation d'une nouvelle base de données (db.enc)...");
+     data = emptyDb();
+     await dbInstance.write(data);
+  } else {
+    ensureCollections(data);
+  }
+  return data;
+}
+
 /**
  * Lit la base de données chiffrée.
  * Crée le fichier avec une structure vide s'il n'existe pas.
  * @returns {Promise<object>} Les données de la base.
  */
 async function readDb() {
-  let data = await dbInstance.read();
-  if (!data) {
-     console.log("Initialisation d'une nouvelle base de données (db.enc)...");
-     data = {
-      items: [], sales: [], stocks: [], services: [],
-      historyImport: [], movements: [], orders: [], signature: ""
-    };
-    await dbInstance.write(data);
-  } else {
-    // S'assurer que tous les tableaux existent (compatibilité avec anciennes données)
-    if (!data.items) data.items = [];
-    if (!data.sales) data.sales = [];
-    if (!data.stocks) data.stocks = [];
-    if (!data.services) data.services = [];
-    if (!data.historyImport) data.historyImport = [];
-    if (!data.movements) data.movements = [];
-    if (!data.orders) data.orders = [];
-    if (!data.signature) data.signature = "";
-  }
-  return data;
+  return withDbLock(() => readDbUnlocked());
 }
 
 /**
@@ -61,8 +82,20 @@ async function readDb() {
  * @param {object} data L'objet de base de données complet à écrire.
  */
 async function writeDb(data) {
-  await dbInstance.write(data);
+  return withDbLock(() => dbInstance.write(data));
 }
 
-// Exporter les fonctions pour qu'elles soient utilisées par les routes
-module.exports = { readDb, writeDb };
+/**
+ * Lecture + mutation + écriture sous le même verrou.
+ * @param {(data: object) => (any|Promise<any>)} mutator
+ */
+async function updateDb(mutator) {
+  return withDbLock(async () => {
+    const data = await readDbUnlocked();
+    const result = await mutator(data);
+    await dbInstance.write(data);
+    return result;
+  });
+}
+
+module.exports = { readDb, writeDb, updateDb, withDbLock };

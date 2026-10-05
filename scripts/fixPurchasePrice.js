@@ -12,7 +12,10 @@ async function fixPurchasePrice() {
     if (sale.purchasePrice !== undefined) return;
 
     // retrouver le produit dans le stock
-    const stockItem = data.stocks.find(s => s.name === sale.produit);
+    const stockItem = data.stocks.find(s =>
+      (sale.stockId != null && String(s.id) === String(sale.stockId)) ||
+      s.name === sale.produit
+    );
 
     if (stockItem) {
       sale.purchasePrice = stockItem.purchasePrice || 0;

@@ -267,6 +267,7 @@ $(document).ready(async function() {
         name: service.name,
         category: service.category || "service",
         produit: produitUtilise.name,
+        stockId: produitUtilise.id,
         quantity,
         salePrice,
         unitPrice: Number(service.price),
@@ -320,6 +321,7 @@ $(document).ready(async function() {
         const sale = {
             id: Date.now(),
             produit: produit.name,
+            stockId: produit.id,
             category: categorySelect.value,
             quantity: Number(quantityInput.value),
             salePrice: Number(priceInput.value),

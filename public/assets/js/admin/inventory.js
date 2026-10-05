@@ -6,9 +6,9 @@ document.addEventListener('DOMContentLoaded', async function () {
 
   // Récupère les données du fichier medocs.json
   async function fetchMedicines() {
-    const res = await fetch('/medocs.json');
+    const res = await fetch('/produits.js');
     const data = await res.json();
-    medicines = data.medicines || [];
+    medicines = data.produits || [];
     filteredMedicines = medicines;
   }
 

@@ -40,8 +40,8 @@ document.addEventListener('DOMContentLoaded', async function() {
       orderId: order.id,
       productId: product.id,
       productName: product.brand_name || "N/A",
-      supplier: product.supplier || "-",
-      pieces: product.pieces || "-",
+      supplier: order.supplier || product.supplier || "-",
+      pieces: order.pieces || product.pieces || "-",
       purchaseTotalPrice: order.purchaseTotalPrice || 0,
       quantity: order.quantity,
       date: order.date,
@@ -307,3 +307,49 @@ document.addEventListener('DOMContentLoaded', async function() {
     XLSX.writeFile(wb, fileName);
   });
 });
+
+// Création de commande : cette fonctionnalité appartient à la liste des commandes.
+const ORDER_DRAFT_KEY = "gestioncom.orderDraft.v1";
+let orderProducts = [];
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const response = await fetch("/api/products");
+  orderProducts = await response.json();
+  document.getElementById("simulateOrder").onclick = openOrderModal;
+});
+
+function openOrderModal() {
+  let modal = document.getElementById("orderModal");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "orderModal";
+    modal.style.cssText = "display:none;position:fixed;z-index:1000;inset:0;background:rgba(0,0,0,.5);justify-content:center;align-items:center";
+    modal.innerHTML = `<div style="background:#fff;padding:20px;border-radius:10px;max-height:730px;overflow:auto"><h3 style="margin-top: 0">Nouvelle commande</h3><table id="orderTable"><thead><tr><th>Produit</th><th>Fournisseur</th><th>Prix globale</th><th>Pièces/Boite</th><th>Quantité</th><th></th></tr></thead><tbody id="orderBody"></tbody></table><p><button id="addOrderLine">+ Ajouter ligne</button></p><strong>Total : <span id="orderTotal">0</span></strong><p><button id="closeOrderModal">Fermer</button><button id="sendOrderModal">Confirmer</button></p></div>`;
+    document.body.appendChild(modal);
+    modal.querySelector("#addOrderLine").onclick = () => addOrderLine();
+    modal.querySelector("#closeOrderModal").onclick = () => { saveOrderDraft(); modal.style.display = "none"; };
+    modal.querySelector("#sendOrderModal").onclick = sendOrder;
+    modal.onclick = e => { if (e.target === modal) { saveOrderDraft(); modal.style.display = "none"; } };
+  }
+  const body = modal.querySelector("#orderBody"); body.innerHTML = "";
+  const draft = readOrderDraft(); (draft.length ? draft : [{}]).forEach(addOrderLine);
+  modal.style.display = "flex";
+}
+
+function addOrderLine(line = {}) {
+  const body = document.getElementById("orderBody"), row = document.createElement("tr");
+  row.innerHTML = `<td><select class="order-product-select"><option value="">Sélectionner</option>${orderProducts.map(p => `<option value="${p.id}">${p.brand_name}</option>`).join("")}</select></td><td><input class="order-supplier" readonly></td><td><input type="number" min="0" class="order-price"></td><td><input class="order-pieces"></td><td><input type="number" min="1" value="1" class="order-qty"></td><td><button class="remove-line">❌</button></td>`;
+  body.appendChild(row);
+  const select = row.querySelector(".order-product-select"); select.value = line.productId || "";
+  const populate = () => { const p = orderProducts.find(x => String(x.id) === select.value); if (!p) return; row.querySelector(".order-supplier").value = p.supplier || "-"; row.querySelector(".order-price").value = line.price ?? p.purchaseTotalPrice ?? 0; row.querySelector(".order-pieces").value = line.pieces ?? p.pieces ?? ""; line = {}; saveOrderDraft(); updateOrderTotal(); };
+  select.onchange = populate;
+  row.querySelectorAll("input").forEach(input => input.oninput = () => { saveOrderDraft(); updateOrderTotal(); });
+  row.querySelector(".remove-line").onclick = () => { row.remove(); saveOrderDraft(); updateOrderTotal(); };
+  if (select.value) populate(); else updateOrderTotal();
+}
+
+function getOrderLines() { return [...document.querySelectorAll("#orderBody tr")].map(row => ({ productId: row.querySelector(".order-product-select").value, price: Number(row.querySelector(".order-price").value) || 0, pieces: row.querySelector(".order-pieces").value, quantity: Number(row.querySelector(".order-qty").value) || 0 })).filter(line => line.productId); }
+function readOrderDraft() { try { return JSON.parse(localStorage.getItem(ORDER_DRAFT_KEY) || "[]"); } catch { return []; } }
+function saveOrderDraft() { localStorage.setItem(ORDER_DRAFT_KEY, JSON.stringify(getOrderLines())); }
+function updateOrderTotal() { let total = 0, quantity = 0; getOrderLines().forEach(line => { total += line.price * line.quantity; quantity += line.quantity; }); document.getElementById("orderTotal").textContent = `${total} Ar (${quantity} unités)`; }
+async function sendOrder() { const items = getOrderLines(); if (!items.length || items.some(item => item.quantity <= 0)) return alert("Ajoutez au moins une ligne valide."); const res = await fetch("/api/orders/batch", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items }) }); const result = await res.json(); if (!res.ok) return alert(result.message || "Erreur lors de l'enregistrement."); localStorage.removeItem(ORDER_DRAFT_KEY); document.getElementById("orderModal").style.display = "none"; alert(result.message); window.location.reload(); }

@@ -14,6 +14,18 @@ let cachedMovements = null;
 let lastFetchTime = 0;
 const CACHE_DURATION = 30000; // 30 secondes
 
+function findStockForSale(stocks, sale) {
+  if (!sale || !Array.isArray(stocks)) return undefined;
+  if (sale.stockId != null && sale.stockId !== "") {
+    const byId = stocks.find(s => String(s.id) === String(sale.stockId));
+    if (byId) return byId;
+  }
+  if (sale.produit) {
+    return stocks.find(s => s.name === sale.produit);
+  }
+  return undefined;
+}
+
 // AJOUT : Variable pour la date de filtrage
 let selectedDate = new Date(); // Initialise à aujourd'hui
 selectedDate.setHours(0, 0, 0, 0); // Met à minuit pour la comparaison
@@ -363,7 +375,7 @@ async function renderTable() {
         if (payment && sale.payment !== payment) return false;
         if (minPrice !== null && sale.salePrice < minPrice) return false;
         if (maxPrice !== null && sale.salePrice > maxPrice) return false;
-        const stockObj = stocks.find(s => s.name === sale.produit);
+        const stockObj = findStockForSale(stocks, sale);
         const stockActuel = stockObj ? stockObj.stock : "N/A";
         if (stockF === "negative" && stockActuel >= 0) return false;
         if (stockF === "less" && !(stockActuel < 5)) return false;
@@ -445,7 +457,7 @@ async function renderSalesServiceTable() {
         if (maxPrice !== null && sale.salePrice > maxPrice) return false;
 
         if (stockF) {
-          const stockObj = stocks.find(st => st.name === sale.produit);
+          const stockObj = findStockForSale(stocks, sale);
           const stockActuel = stockObj ? stockObj.stock : "N/A";
           if (stockF === "negative" && stockActuel >= 0) return false;
           if (stockF === "less" && !(stockActuel < 5)) return false;
@@ -703,6 +715,7 @@ async function editSale(id, isService) {
           name: selectedService.name,
           category: "service",
           produit: selectedProduit.name,
+          stockId: selectedProduit.id,
           quantity: Number(document.getElementById('edit-serviceQuantity').value),
           salePrice: Number(document.getElementById('edit-servicePrice').value),
           unitPrice: Number(selectedService.price),
@@ -735,7 +748,7 @@ async function editSale(id, isService) {
     } else { // C'est un produit
       createProductEditModal();
       const modal = document.getElementById("editProductModal");
-      const produit = cachedStocks.find(p => p.name === sale.produit);
+      const produit = findStockForSale(cachedStocks, sale);
 
       // Remplir les champs
       const produitSelectElement = document.getElementById('edit-produits');
@@ -777,6 +790,7 @@ async function editSale(id, isService) {
         const updatedSale = {
           id: sale.id,
           produit: selectedProduit.name,
+          stockId: selectedProduit.id,
           category: document.getElementById('edit-category').value, // Prendre la valeur affichée
           quantity: Number(document.getElementById('edit-quantity').value),
           salePrice: Number(document.getElementById('edit-price').value),

@@ -160,6 +160,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             <th>Catégorie</th>
             <th>Prix d'achat</th>
             <th>Prix de vente</th>
+            <th>Prix globale</th>
             <th>Vendus</th>
             <th>Stock</th>
             <th>(PV * V)</th>
@@ -182,6 +183,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           <td>${getFormLabel(p.category) || ""}</td>
           <td style="text-align:right;">${formatAr(p.purchasePrice)}</td>
           <td style="text-align:right;">${formatAr(p.salePrice)}</td>
+          <td style="text-align:right;">${formatAr(p.purchaseTotalPrice)}</td>
           <td>${p.sold || 0}</td>
           <td>${p.stock || 0}</td>
           <td style="text-align:right;">${formatAr(totalVente)}</td>
@@ -247,18 +249,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Fonction pour évaluer une expression mathématique simple
     function evaluateStockExpression(expression, currentStock) {
       try {
-        // Remplace le stock actuel (représenté par x) par sa valeur
-        const sanitizedExpr = expression.replace(/x/gi, currentStock);
-        
-        // Vérifie si c'est une expression avec opérateur ou juste un nombre
-        if (/[+\-*/]/.test(sanitizedExpr)) {
-          // Évalue l'expression en toute sécurité
-          // eslint-disable-next-line no-new-func
-          return Function('"use strict"; return (' + sanitizedExpr + ')')();
-        } else {
-          // C'est juste un nombre
-          return Number(sanitizedExpr);
+        const currentStockNumber = Number(currentStock);
+        const baseStock = Number.isFinite(currentStockNumber) ? currentStockNumber : 0;
+        const sanitizedExpr = String(expression)
+          .trim()
+          .replace(/,/g, ".")
+          // Remplace x par le stock actuel entre parenthèses pour gérer les valeurs négatives.
+          .replace(/x/gi, `(${baseStock})`);
+
+        if (!sanitizedExpr || !/^[\d+\-*/().\s]+$/.test(sanitizedExpr)) {
+          return null;
         }
+
+        // Remplace le stock actuel (représenté par x) par sa valeur
+        // eslint-disable-next-line no-new-func
+        const result = Function('"use strict"; return (' + sanitizedExpr + ')')();
+        return Number.isFinite(result) ? result : null;
       } catch (e) {
         console.error("Erreur lors de l'évaluation de l'expression", e);
         return null; // Expression invalide
@@ -285,7 +291,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         selectCat.value = produit.category || "";
         document.getElementById("editPurchasePrice").value = produit.purchasePrice || "";
         document.getElementById("editSalePrice").value = produit.salePrice || "";
-        document.getElementById("editStock").value = produit.stock || "";
+        document.getElementById("editStock").value = produit.stock ?? "";
         
         // Ajouter l'écouteur d'événement pour mettre à jour le prix de vente
         document.getElementById("editPurchasePrice").addEventListener("input", function() {
@@ -327,12 +333,12 @@ document.addEventListener("DOMContentLoaded", async () => {
           }
           
           // Évaluer l'expression de stock
-          const currentStock = produit.stock || 0;
+          const currentStock = Number(produit.stock ?? 0);
           const newStock = evaluateStockExpression(stockExpression, currentStock);
           
           // Vérifier si l'expression est valide
           if (newStock === null) {
-            alert("Expression de stock invalide. Utilisez un nombre ou une opération comme '30+12'.");
+            alert("Expression de stock invalide. Utilisez un nombre ou une opération comme '-45+500' ou 'x+500'.");
             return;
           }
           
@@ -404,11 +410,17 @@ document.addEventListener("DOMContentLoaded", async () => {
             history: history
           };
 
-          await fetch(`/api/stocks/${id}`, {
+          const updateResponse = await fetch(`/api/stocks/${id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(updated)
           });
+
+          if (!updateResponse.ok) {
+            const error = await updateResponse.json().catch(() => ({}));
+            alert(error.message || "Impossible de mettre à jour le stock.");
+            return;
+          }
           
           document.getElementById("editModal").style.display = "none";
           renderTable();

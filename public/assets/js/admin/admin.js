@@ -5,9 +5,9 @@ async function populateServiceProduitSelect() {
   const select = document.getElementById('serviceProduit');
   if (!select) return;
   try {
-    const response = await fetch('/medocs.json');
+    const response = await fetch('/produits.js');
     const data = await response.json();
-    const produits = data.medicines || [];
+    const produits = data.produits || [];
     
     select.innerHTML = '<option value="">Sélectionner un produit</option>';
     

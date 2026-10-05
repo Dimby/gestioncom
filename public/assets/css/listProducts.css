@@ -11,3 +11,44 @@ td button.remove-line {
 .select2.select2-container {
     width: 300px !important;
 }
+
+#editProductForm label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+#editProductForm {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#cancelProduct {
+    background-color: #f2f2f2;
+    color: gray;
+    padding: 8px 10px;
+    margin-right: 10px;
+}
+
+#closeOrderModal {
+    background-color: #f2f2f2;
+    color: gray;
+    padding: 8px 20px;
+}
+
+#productsTable button {
+    padding: 0;
+    background-color: transparent;
+}
+
+#productsTable .edit-product {
+    margin-right: 10px;
+}
+
+#paginationNav {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+}

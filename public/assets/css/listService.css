@@ -48,3 +48,21 @@ button#cancelEditService {
     gap: 10px;
     margin-bottom: 20px;
 }
+
+#serviceForm label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+#serviceForm {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+button#cancelAddService {
+    background-color: #f2f2f2;
+    color: gray;
+    padding: 8px 20px;
+}

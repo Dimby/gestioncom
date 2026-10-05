@@ -1,11 +1,11 @@
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
+const { updateDb } = require("../db");
 
 const router = express.Router();
 
-// chemin vers medocs.json
-const filePath = path.join(__dirname, "../public/medocs.json");
+const filePath = path.join(__dirname, "../public/produits.js");
 
 // utilitaires
 function readProducts() {
@@ -21,7 +21,7 @@ function writeProducts(data) {
 router.get("/", (req, res) => {
   try {
     const data = readProducts();
-    res.json(data.medicines || []);
+    res.json(data.produits || []);
   } catch (e) {
     res.status(500).json({ message: "Erreur serveur: " + e.message });
   }
@@ -41,10 +41,16 @@ router.post("/", (req, res) => {
     const newProduct = {
       id: Date.now().toString(),
       brand_name: product.brand_name,
-      generic_name: product.generic_name || ""
+      generic_name: product.generic_name || "",
+      pieces: product.pieces || 0,
+      supplier: product.supplier || "",
+      purchasePrice: Number(product.purchasePrice) || 0,
+      salePrice: Number(product.salePrice) || 0,
+      purchaseTotalPrice: Number(product.purchaseTotalPrice) || 0
     };
 
-    data.medicines.push(newProduct);
+    data.produits = data.produits || [];
+    data.produits.push(newProduct);
 
     writeProducts(data);
 
@@ -56,25 +62,39 @@ router.post("/", (req, res) => {
 });
 
 // PUT UPDATE PRODUCT
-router.put("/:id", (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
     const id = req.params.id;
     const updatedData = req.body;
 
     const data = readProducts();
 
-    const index = data.medicines.findIndex(p => p.id == id);
+    const index = (data.produits || []).findIndex(p => p.id == id);
 
     if (index === -1) {
       return res.status(404).json({ message: "Produit non trouvé." });
     }
 
-    data.medicines[index] = {
-      ...data.medicines[index],
+    data.produits[index] = {
+      ...data.produits[index],
       ...updatedData
     };
 
     writeProducts(data);
+
+    // Le stock garde les mêmes prix et informations que le produit catalogue.
+    await updateDb((db) => {
+      const stock = (db.stocks || []).find(s => String(s.id) === String(id));
+      if (stock) {
+        const product = data.produits[index];
+        stock.name = product.brand_name;
+        stock.category = product.generic_name;
+        stock.pieces = product.pieces;
+        stock.purchaseTotalPrice = product.purchaseTotalPrice;
+        stock.purchasePrice = product.purchasePrice;
+        stock.salePrice = product.salePrice;
+      }
+    });
 
     res.json({ message: "Produit modifié." });
 
@@ -90,13 +110,13 @@ router.delete("/:id", (req, res) => {
 
     const data = readProducts();
 
-    const index = data.medicines.findIndex(p => p.id == id);
+    const index = (data.produits || []).findIndex(p => p.id == id);
 
     if (index === -1) {
       return res.status(404).json({ message: "Produit non trouvé." });
     }
 
-    data.medicines.splice(index, 1);
+    data.produits.splice(index, 1);
 
     writeProducts(data);
 

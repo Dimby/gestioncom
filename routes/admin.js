@@ -2,9 +2,8 @@ const express = require("express");
 const fs = require("fs");
 const multer = require("multer");
 const path = require("path");
-const { db } = require("../db");
+const { readDb, withDbLock } = require("../db");
 const { isAdmin, decode } = require("../middlewares/auth");
-const { computeDbHash } = require("../utils/hash");
 
 const router = express.Router();
 const upload = multer({ dest: 'uploads/' });
@@ -87,7 +86,7 @@ router.get('/download-db', (req, res) => {
 });
 
 // Remplace directement le fichier db.enc par le fichier uploadé
-router.post('/import-db', upload.single('dbFile'), (req, res) => {
+router.post('/import-db', upload.single('dbFile'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: "Aucun fichier reçu." });
   }
@@ -96,12 +95,11 @@ router.post('/import-db', upload.single('dbFile'), (req, res) => {
   const targetPath = path.join(process.cwd(), 'db.enc');
 
   try {
-    // Remplace l'ancien db.enc par le nouveau fichier
-    // fs.renameSync déplace le fichier
-    fs.renameSync(tempPath, targetPath);
+    await withDbLock(() => {
+      fs.renameSync(tempPath, targetPath);
+    });
     res.json({ message: "Base de données importée et remplacée avec succès." });
   } catch (err) {
-    // En cas d'erreur, on supprime le fichier temporaire
     if (fs.existsSync(tempPath)) {
       fs.unlinkSync(tempPath);
     }
