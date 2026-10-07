@@ -41,7 +41,9 @@ document.addEventListener('DOMContentLoaded', async function() {
       productId: product.id,
       productName: product.brand_name || "N/A",
       supplier: order.supplier || product.supplier || "-",
-      pieces: order.pieces || product.pieces || "-",
+      pieces: order.piecesQuantity
+        ? formatOrderPieces(order)
+        : (order.pieces || (product.piecesQuantity ? formatOrderPieces(product) : product.pieces) || "-"),
       purchaseTotalPrice: order.purchaseTotalPrice || 0,
       quantity: order.quantity,
       date: order.date,
@@ -311,6 +313,44 @@ document.addEventListener('DOMContentLoaded', async function() {
 // Création de commande : cette fonctionnalité appartient à la liste des commandes.
 const ORDER_DRAFT_KEY = "gestioncom.orderDraft.v1";
 let orderProducts = [];
+const ORDER_UNITS = [
+  ["piece", "Pièce"],
+  ["boite", "Boîte"],
+  ["litre", "Litre"],
+  ["kg", "Kilogramme"],
+  ["metre", "Mètre"],
+  ["rouleau", "Rouleau"],
+  ["paquet", "Paquet"]
+];
+
+function normalizeOrderUnits(item = {}) {
+  const match = String(item.pieces ?? "").trim().match(/^(\d+(?:[.,]\d+)?)\s*([^\d\s(]+)?/);
+  const aliases = {
+    pieces: "piece", "pièce": "piece", "pièces": "piece",
+    boites: "boite", "boîte": "boite", "boîtes": "boite",
+    litres: "litre", kilogramme: "kg", kilogrammes: "kg",
+    mètre: "metre", mètres: "metre", rouleaux: "rouleau", paquets: "paquet"
+  };
+  const legacyCount = match ? Number(match[1].replace(",", ".")) : 1;
+  return {
+    piecesQuantity: Number(item.piecesQuantity) > 0
+      ? Number(item.piecesQuantity)
+      : (Number.isFinite(legacyCount) && legacyCount > 0 ? legacyCount : 1),
+    piecesUnit: item.piecesUnit || aliases[match?.[2]?.toLowerCase()] || "piece"
+  };
+}
+
+function formatOrderPieces(item) {
+  const { piecesQuantity, piecesUnit } = normalizeOrderUnits(item);
+  const labels = {
+    piece: ["pièce", "pièces"], boite: ["boîte", "boîtes"],
+    litre: ["litre", "litres"], kg: ["kg", "kg"],
+    metre: ["mètre", "mètres"], rouleau: ["rouleau", "rouleaux"],
+    paquet: ["paquet", "paquets"]
+  };
+  const unitLabels = labels[piecesUnit] || [piecesUnit, `${piecesUnit}s`];
+  return `${piecesQuantity} ${piecesQuantity > 1 ? unitLabels[1] : unitLabels[0]}`;
+}
 
 document.addEventListener("DOMContentLoaded", async () => {
   const response = await fetch("/api/products");
@@ -324,7 +364,7 @@ function openOrderModal() {
     modal = document.createElement("div");
     modal.id = "orderModal";
     modal.style.cssText = "display:none;position:fixed;z-index:1000;inset:0;background:rgba(0,0,0,.5);justify-content:center;align-items:center";
-    modal.innerHTML = `<div style="background:#fff;padding:20px;border-radius:10px;max-height:730px;overflow:auto"><h3 style="margin-top: 0">Nouvelle commande</h3><table id="orderTable"><thead><tr><th>Produit</th><th>Fournisseur</th><th>Prix globale</th><th>Pièces/Boite</th><th>Quantité</th><th></th></tr></thead><tbody id="orderBody"></tbody></table><p><button id="addOrderLine">+ Ajouter ligne</button></p><strong>Total : <span id="orderTotal">0</span></strong><p><button id="closeOrderModal">Fermer</button><button id="sendOrderModal">Confirmer</button></p></div>`;
+    modal.innerHTML = `<div style="background:#fff;padding:20px;border-radius:10px;max-height:730px;overflow:auto"><h3 style="margin-top: 0">Nouvelle commande</h3><table id="orderTable"><thead><tr><th>Produit</th><th>Fournisseur</th><th>Prix global</th><th>Nombre</th><th>Unité</th><th>Quantité commandée</th><th></th></tr></thead><tbody id="orderBody"></tbody></table><p><button id="addOrderLine">+ Ajouter ligne</button></p><strong>Total : <span id="orderTotal">0</span></strong><p><button id="closeOrderModal">Fermer</button><button id="sendOrderModal">Confirmer</button></p></div>`;
     document.body.appendChild(modal);
     modal.querySelector("#addOrderLine").onclick = () => addOrderLine();
     modal.querySelector("#closeOrderModal").onclick = () => { saveOrderDraft(); modal.style.display = "none"; };
@@ -338,18 +378,69 @@ function openOrderModal() {
 
 function addOrderLine(line = {}) {
   const body = document.getElementById("orderBody"), row = document.createElement("tr");
-  row.innerHTML = `<td><select class="order-product-select"><option value="">Sélectionner</option>${orderProducts.map(p => `<option value="${p.id}">${p.brand_name}</option>`).join("")}</select></td><td><input class="order-supplier" readonly></td><td><input type="number" min="0" class="order-price"></td><td><input class="order-pieces"></td><td><input type="number" min="1" value="1" class="order-qty"></td><td><button class="remove-line">❌</button></td>`;
+  row.innerHTML = `<td><select class="order-product-select"><option value="">Sélectionner</option>${orderProducts.map(p => `<option value="${p.id}">${p.brand_name}</option>`).join("")}</select></td><td><input class="order-supplier" readonly></td><td><input type="number" min="0" class="order-price"></td><td><input type="number" min="0.01" step="any" class="order-pieces-quantity" required></td><td><select class="order-pieces-unit">${ORDER_UNITS.map(([value, label]) => `<option value="${value}">${label}</option>`).join("")}</select></td><td><input type="number" min="1" step="1" value="1" class="order-qty"></td><td><button class="remove-line">❌</button></td>`;
   body.appendChild(row);
   const select = row.querySelector(".order-product-select"); select.value = line.productId || "";
-  const populate = () => { const p = orderProducts.find(x => String(x.id) === select.value); if (!p) return; row.querySelector(".order-supplier").value = p.supplier || "-"; row.querySelector(".order-price").value = line.price ?? p.purchaseTotalPrice ?? 0; row.querySelector(".order-pieces").value = line.pieces ?? p.pieces ?? ""; line = {}; saveOrderDraft(); updateOrderTotal(); };
-  select.onchange = populate;
-  row.querySelectorAll("input").forEach(input => input.oninput = () => { saveOrderDraft(); updateOrderTotal(); });
-  row.querySelector(".remove-line").onclick = () => { row.remove(); saveOrderDraft(); updateOrderTotal(); };
+  const populate = () => {
+    const p = orderProducts.find(x => String(x.id) === select.value);
+    if (!p) return;
+    const units = normalizeOrderUnits(line.productId ? line : p);
+    row.querySelector(".order-supplier").value = p.supplier || "-";
+    row.querySelector(".order-price").value = line.price ?? p.purchaseTotalPrice ?? 0;
+    row.querySelector(".order-pieces-quantity").value = units.piecesQuantity;
+    row.querySelector(".order-pieces-unit").value = units.piecesUnit;
+    row.querySelector(".order-qty").value = line.quantity ?? 1;
+    line = {};
+    saveOrderDraft();
+    updateOrderTotal();
+  };
+  // Select customisé avec recherche (comme #serviceSelect dans main.js).
+  const dropdownParent = document.querySelector("#orderModal > div");
+  $(select).select2({
+    placeholder: "Rechercher un produit",
+    width: "resolve",
+    dropdownParent: dropdownParent || undefined,
+  }).on("change", populate);
+  // Les autres champs (hors sélecteur produit, géré séparément ci-dessus) déclenchent juste la sauvegarde du brouillon.
+  row.querySelectorAll("input, select:not(.order-product-select)").forEach(input => {
+    input.oninput = () => { saveOrderDraft(); updateOrderTotal(); };
+    input.onchange = () => { saveOrderDraft(); updateOrderTotal(); };
+  });
+  row.querySelector(".remove-line").onclick = () => {
+    $(select).select2("destroy");
+    row.remove();
+    saveOrderDraft();
+    updateOrderTotal();
+  };
   if (select.value) populate(); else updateOrderTotal();
 }
 
-function getOrderLines() { return [...document.querySelectorAll("#orderBody tr")].map(row => ({ productId: row.querySelector(".order-product-select").value, price: Number(row.querySelector(".order-price").value) || 0, pieces: row.querySelector(".order-pieces").value, quantity: Number(row.querySelector(".order-qty").value) || 0 })).filter(line => line.productId); }
+function getOrderLines() {
+  return [...document.querySelectorAll("#orderBody tr")].map(row => ({
+    productId: row.querySelector(".order-product-select").value,
+    price: Number(row.querySelector(".order-price").value) || 0,
+    piecesQuantity: Number(row.querySelector(".order-pieces-quantity").value) || 0,
+    piecesUnit: row.querySelector(".order-pieces-unit").value,
+    quantity: Number(row.querySelector(".order-qty").value) || 0
+  })).filter(line => line.productId);
+}
 function readOrderDraft() { try { return JSON.parse(localStorage.getItem(ORDER_DRAFT_KEY) || "[]"); } catch { return []; } }
 function saveOrderDraft() { localStorage.setItem(ORDER_DRAFT_KEY, JSON.stringify(getOrderLines())); }
 function updateOrderTotal() { let total = 0, quantity = 0; getOrderLines().forEach(line => { total += line.price * line.quantity; quantity += line.quantity; }); document.getElementById("orderTotal").textContent = `${total} Ar (${quantity} unités)`; }
-async function sendOrder() { const items = getOrderLines(); if (!items.length || items.some(item => item.quantity <= 0)) return alert("Ajoutez au moins une ligne valide."); const res = await fetch("/api/orders/batch", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items }) }); const result = await res.json(); if (!res.ok) return alert(result.message || "Erreur lors de l'enregistrement."); localStorage.removeItem(ORDER_DRAFT_KEY); document.getElementById("orderModal").style.display = "none"; alert(result.message); window.location.reload(); }
+async function sendOrder() {
+  const items = getOrderLines();
+  if (!items.length || items.some(item => item.quantity <= 0 || item.piecesQuantity <= 0)) {
+    return alert("Ajoutez au moins une ligne valide avec un nombre de pièces et une quantité supérieurs à zéro.");
+  }
+  const res = await fetch("/api/orders/batch", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ items })
+  });
+  const result = await res.json();
+  if (!res.ok) return alert(result.message || "Erreur lors de l'enregistrement.");
+  localStorage.removeItem(ORDER_DRAFT_KEY);
+  document.getElementById("orderModal").style.display = "none";
+  alert(result.message);
+  window.location.reload();
+}

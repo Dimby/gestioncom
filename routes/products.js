@@ -2,6 +2,7 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const { updateDb } = require("../db");
+const { PRODUCT_UNITS, normalizeProductUnits, calculatePurchasePrice } = require("../utils/productUnits");
 
 const router = express.Router();
 
@@ -37,16 +38,25 @@ router.post("/", (req, res) => {
     }
 
     const data = readProducts();
+    const requestedQuantity = Number(product.piecesQuantity);
+    if (product.piecesQuantity !== undefined && (!Number.isFinite(requestedQuantity) || requestedQuantity <= 0)) {
+      return res.status(400).json({ message: "Le nombre de pièces doit être supérieur à zéro." });
+    }
+    if (product.piecesUnit !== undefined && !PRODUCT_UNITS.includes(product.piecesUnit)) {
+      return res.status(400).json({ message: "Unité de produit invalide." });
+    }
+    const units = normalizeProductUnits(product);
+    const purchaseTotalPrice = Number(product.purchaseTotalPrice) || 0;
 
     const newProduct = {
       id: Date.now().toString(),
       brand_name: product.brand_name,
       generic_name: product.generic_name || "",
-      pieces: product.pieces || 0,
+      ...units,
       supplier: product.supplier || "",
-      purchasePrice: Number(product.purchasePrice) || 0,
+      purchasePrice: calculatePurchasePrice(purchaseTotalPrice, units.piecesQuantity),
       salePrice: Number(product.salePrice) || 0,
-      purchaseTotalPrice: Number(product.purchaseTotalPrice) || 0
+      purchaseTotalPrice
     };
 
     data.produits = data.produits || [];
@@ -75,10 +85,26 @@ router.put("/:id", async (req, res) => {
       return res.status(404).json({ message: "Produit non trouvé." });
     }
 
-    data.produits[index] = {
+    const mergedProduct = {
       ...data.produits[index],
       ...updatedData
     };
+    if (updatedData.piecesQuantity !== undefined &&
+      (!Number.isFinite(Number(updatedData.piecesQuantity)) || Number(updatedData.piecesQuantity) <= 0)) {
+      return res.status(400).json({ message: "Le nombre de pièces doit être supérieur à zéro." });
+    }
+    if (updatedData.piecesUnit !== undefined && !PRODUCT_UNITS.includes(updatedData.piecesUnit)) {
+      return res.status(400).json({ message: "Unité de produit invalide." });
+    }
+    const units = normalizeProductUnits(mergedProduct);
+    const purchaseTotalPrice = Number(mergedProduct.purchaseTotalPrice) || 0;
+    data.produits[index] = {
+      ...mergedProduct,
+      ...units,
+      purchaseTotalPrice,
+      purchasePrice: calculatePurchasePrice(purchaseTotalPrice, units.piecesQuantity)
+    };
+    delete data.produits[index].pieces;
 
     writeProducts(data);
 
@@ -89,7 +115,9 @@ router.put("/:id", async (req, res) => {
         const product = data.produits[index];
         stock.name = product.brand_name;
         stock.category = product.generic_name;
-        stock.pieces = product.pieces;
+        stock.piecesQuantity = product.piecesQuantity;
+        stock.piecesUnit = product.piecesUnit;
+        delete stock.pieces;
         stock.purchaseTotalPrice = product.purchaseTotalPrice;
         stock.purchasePrice = product.purchasePrice;
         stock.salePrice = product.salePrice;

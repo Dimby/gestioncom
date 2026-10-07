@@ -3,6 +3,66 @@ const DRAFT = "gestioncom.orderDraft.v1";
 let products = [],
 	currentPage = 1,
 	itemsPerPage = 10;
+
+const PRODUCT_UNITS = [
+	["piece", "Pièce"],
+	["boite", "Boîte"],
+	["litre", "Litre"],
+	["kg", "Kilogramme"],
+	["metre", "Mètre"],
+	["rouleau", "Rouleau"],
+	["paquet", "Paquet"],
+];
+
+function productUnits(product = {}) {
+	product = product || {};
+	const legacy = String(product.pieces ?? "").trim().match(/^(\d+(?:[.,]\d+)?)\s*([^\d\s(]+)?/);
+	const legacyQuantity = legacy ? Number(legacy[1].replace(",", ".")) : 1;
+	const legacyUnit = legacy?.[2]?.toLowerCase() || "piece";
+	const units = {
+		pieces: "piece",
+		pièce: "piece",
+		pièces: "piece",
+		boites: "boite",
+		"boîte": "boite",
+		"boîtes": "boite",
+		litres: "litre",
+		kilogramme: "kg",
+		kilogrammes: "kg",
+		mètre: "metre",
+		mètres: "metre",
+		rouleaux: "rouleau",
+		paquets: "paquet",
+	};
+	const quantity = Number(product.piecesQuantity);
+	return {
+		piecesQuantity: Number.isFinite(quantity) && quantity > 0
+			? quantity
+			: (Number.isFinite(legacyQuantity) && legacyQuantity > 0 ? legacyQuantity : 1),
+		piecesUnit: product.piecesUnit || units[legacyUnit] || legacyUnit,
+	};
+}
+
+function formatPieces(product) {
+	const { piecesQuantity, piecesUnit } = productUnits(product);
+	const labels = {
+		piece: ["pièce", "pièces"],
+		boite: ["boîte", "boîtes"],
+		litre: ["litre", "litres"],
+		kg: ["kg", "kg"],
+		metre: ["mètre", "mètres"],
+		rouleau: ["rouleau", "rouleaux"],
+		paquet: ["paquet", "paquets"],
+	};
+	const unitLabels = labels[piecesUnit] || [piecesUnit, `${piecesUnit}s`];
+	return `${piecesQuantity} ${piecesQuantity > 1 ? unitLabels[1] : unitLabels[0]}`;
+}
+
+function purchasePrice(total, quantity) {
+	const count = Number(quantity);
+	return count > 0 ? Math.ceil((Number(total) || 0) / count) : 0;
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
 	await reloadProducts();
 	searchInput.oninput = () => {
@@ -37,7 +97,7 @@ function renderProducts() {
 				);
 	productCount.textContent = filtered.length;
 	const container = document.getElementById("products");
-	container.innerHTML = `<table border="1" id="productsTable"><thead><tr><th>Nom produit</th><th>Type</th><th>Fournisseur</th><th>Prix global</th><th>Prix achat</th><th>Pièces/Boite</th><th>Prix vente</th><th>Action</th></tr></thead><tbody>${shown.map((p) => `<tr data-id="${p.id}"><td>${p.brand_name || ""}</td><td>${p.generic_name || ""}</td><td>${p.supplier || "-"}</td><td>${p.purchaseTotalPrice || 0}</td><td>${p.purchasePrice || 0}</td><td>${p.pieces || "-"}</td><td>${p.salePrice || 0}</td><td><button class="edit-product">✏️</button><button class="delete-product">🗑️</button></td></tr>`).join("")}</tbody></table>`;
+	container.innerHTML = `<table border="1" id="productsTable"><thead><tr><th>Nom produit</th><th>Type</th><th>Fournisseur</th><th>Prix global</th><th>Prix achat</th><th>Pièces/Boite</th><th>Prix vente</th><th>Action</th></tr></thead><tbody>${shown.map((p) => `<tr data-id="${p.id}"><td>${p.brand_name || ""}</td><td>${p.generic_name || ""}</td><td>${p.supplier || "-"}</td><td>${p.purchaseTotalPrice || 0}</td><td>${p.purchasePrice || 0}</td><td>${formatPieces(p)}</td><td>${p.salePrice || 0}</td><td><button class="edit-product">✏️</button><button class="delete-product">🗑️</button></td></tr>`).join("")}</tbody></table>`;
 	document
 		.querySelectorAll(".edit-product")
 		.forEach(
@@ -90,11 +150,14 @@ function productModal() {
 	m.id = "editProductModal";
 	m.style.cssText =
 		"display:none;position:fixed;z-index:1000;inset:0;background:#0008;justify-content:center;align-items:center";
-	m.innerHTML = `<div style="background:white;padding:20px;border-radius:10px;width:400px"><h3 id="productModalTitle"></h3><form id="editProductForm"><label>Nom produit<input id="productName" required></label><label>Type<select id="productType"></select></label><label>Pièces/Boite<input id="productPieces"></label><label>Fournisseur<input id="productSupplier"></label><label>Prix global<input type="number" min="0" id="productTotalPrice"></label><label>Prix d'achat<input type="number" min="0" id="productPurchasePrice" required></label><label>Prix de vente<input type="number" min="0" id="productSalePrice" required></label><p style="margin: 0"><button type="button" id="cancelProduct">Annuler</button><button>Valider</button></p></form></div>`;
+	m.innerHTML = `<div style="background:white;padding:20px;border-radius:10px;width:400px"><h3 id="productModalTitle"></h3><form id="editProductForm"><label>Nom produit<input id="productName" required></label><label>Type<select id="productType"></select></label><label>Fournisseur<input id="productSupplier"></label><label>Prix global<input type="number" min="0" step="any" id="productTotalPrice"></label><label>Nombre de pièces/boîtes<input type="number" min="0.01" step="any" id="productPiecesQuantity" required></label><label>Unité<select id="productPiecesUnit" required></select></label><label>Prix d'achat<input type="number" min="0" id="productPurchasePrice" readonly required></label><label>Prix de vente<input type="number" min="0" id="productSalePrice" required></label><p style="margin: 0"><button type="button" id="cancelProduct">Annuler</button><button>Valider</button></p></form></div>`;
 	document.body.appendChild(m);
 	const q = (id) => m.querySelector(`#${id}`);
 	Object.entries(PRODUCT_CATEGORIES).forEach(([v, l]) =>
 		q("productType").add(new Option(l, v)),
+	);
+	PRODUCT_UNITS.forEach(([value, label]) =>
+		q("productPiecesUnit").add(new Option(label, value)),
 	);
 	q("cancelProduct").onclick = () => (m.style.display = "none");
 	m.onclick = (e) => {
@@ -110,21 +173,30 @@ function openProductModal(p = null) {
 		: "Ajouter un produit";
 	q("productName").value = p?.brand_name || "";
 	q("productType").value = p?.generic_name || "";
-	q("productPieces").value = p?.pieces || "";
 	q("productSupplier").value = p?.supplier || "";
 	q("productTotalPrice").value = p?.purchaseTotalPrice || "";
-	q("productPurchasePrice").value = p?.purchasePrice || "";
+	const units = productUnits(p);
+	q("productPiecesQuantity").value = units.piecesQuantity;
+	q("productPiecesUnit").value = units.piecesUnit;
+	q("productPurchasePrice").value = purchasePrice(
+		q("productTotalPrice").value,
+		q("productPiecesQuantity").value,
+	);
 	q("productSalePrice").value = p?.salePrice || "";
-	q("productPurchasePrice").oninput = (e) => {
-		if (+e.target.value > 0)
-			q("productSalePrice").value = calculateSalePrice(+e.target.value);
+	const updatePurchasePrice = () => {
+		const amount = purchasePrice(q("productTotalPrice").value, q("productPiecesQuantity").value);
+		q("productPurchasePrice").value = amount;
+		if (amount > 0) q("productSalePrice").value = calculateSalePrice(amount);
 	};
+	q("productTotalPrice").oninput = updatePurchasePrice;
+	q("productPiecesQuantity").oninput = updatePurchasePrice;
 	q("editProductForm").onsubmit = async (e) => {
 		e.preventDefault();
 		const body = {
 			brand_name: q("productName").value.trim(),
 			generic_name: q("productType").value,
-			pieces: q("productPieces").value,
+			piecesQuantity: +q("productPiecesQuantity").value,
+			piecesUnit: q("productPiecesUnit").value,
 			supplier: q("productSupplier").value.trim(),
 			purchaseTotalPrice: +q("productTotalPrice").value || 0,
 			purchasePrice: +q("productPurchasePrice").value || 0,

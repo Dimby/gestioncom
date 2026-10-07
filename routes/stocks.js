@@ -3,6 +3,7 @@ const express = require("express");
 const { readDb, updateDb } = require("../db");
 const path = require("path");
 const fs = require("fs").promises;
+const { PRODUCT_UNITS, normalizeProductUnits, calculatePurchasePrice } = require("../utils/productUnits");
 
 const router = express.Router();
 
@@ -19,11 +20,20 @@ router.get("/", async (req, res) => { // <-- MODIFIÉ (async)
 // Route POST (ajout stock)
 router.post("/", async (req, res) => { // <-- MODIFIÉ (async)
   try {
-    const { id, name, category, pieces, purchaseTotalPrice, purchasePrice, salePrice, stock, brand_name } = req.body;
+    const { id, name, category, piecesQuantity, piecesUnit, pieces, purchaseTotalPrice, salePrice, stock, brand_name } = req.body;
+    const units = normalizeProductUnits({ piecesQuantity, piecesUnit, pieces });
+    if (piecesQuantity !== undefined && (!Number.isFinite(Number(piecesQuantity)) || Number(piecesQuantity) <= 0)) {
+      return res.status(400).json({ message: "Le nombre de pièces doit être supérieur à zéro." });
+    }
+    if (piecesUnit !== undefined && !PRODUCT_UNITS.includes(piecesUnit)) {
+      return res.status(400).json({ message: "Unité de produit invalide." });
+    }
+    const totalPrice = Number(purchaseTotalPrice) || 0;
+    const unitPurchasePrice = calculatePurchasePrice(totalPrice, units.piecesQuantity);
     const created = await updateDb((data) => {
       const exists = data.stocks.find(p => p.id === id);
       if (exists) return { exists: true };
-      data.stocks.push({ id, name, category, pieces, purchaseTotalPrice, purchasePrice, salePrice, stock, sold: 0, history: req.body.history });
+      data.stocks.push({ id, name, category, ...units, purchaseTotalPrice: totalPrice, purchasePrice: unitPurchasePrice, salePrice, stock, sold: 0, history: req.body.history });
       return { exists: false };
     });
     if (created && created.exists) {
@@ -41,11 +51,11 @@ router.post("/", async (req, res) => { // <-- MODIFIÉ (async)
         id: id,
         brand_name: brand_name || name.split(' - ')[0], // Récupère le nom sans le label
         generic_name: category,
-        pieces,
+        ...units,
         supplier: category,
-        purchasePrice,
+        purchasePrice: unitPurchasePrice,
         salePrice,
-        purchaseTotalPrice,
+        purchaseTotalPrice: totalPrice,
       });
       
       await fs.writeFile(medocsPath, JSON.stringify(medocsJson, null, 2));
@@ -67,7 +77,13 @@ router.put("/:id", async (req, res) => { // <-- MODIFIÉ (async)
     const result = await updateDb((data) => {
       const idx = data.stocks.findIndex(p => String(p.id) === String(id));
       if (idx === -1) return { notFound: true };
-      data.stocks[idx] = updated;
+      data.stocks[idx] = { ...data.stocks[idx], ...updated };
+      if (!data.stocks[idx].piecesQuantity || !data.stocks[idx].piecesUnit) {
+        const units = normalizeProductUnits(data.stocks[idx]);
+        data.stocks[idx].piecesQuantity = units.piecesQuantity;
+        data.stocks[idx].piecesUnit = units.piecesUnit;
+      }
+      delete data.stocks[idx].pieces;
       return { notFound: false };
     });
     if (result && result.notFound) {

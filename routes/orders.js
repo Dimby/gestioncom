@@ -2,6 +2,7 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const { readDb, updateDb } = require("../db");
+const { PRODUCT_UNITS, normalizeProductUnits, calculatePurchasePrice } = require("../utils/productUnits");
 
 const router = express.Router();
 
@@ -78,25 +79,39 @@ router.post("/batch", async (req, res) => {
     });
 
     for (const item of items) {
-      if (!item.productId || !item.quantity || item.quantity <= 0) {
+      if (!item.productId || !Number.isFinite(Number(item.quantity)) || Number(item.quantity) <= 0) {
         return res.status(400).json({ message: "Chaque article doit avoir un ID et une quantité valide." });
       }
       if (!productsMap[item.productId]) {
         return res.status(404).json({ message: `Produit ${item.productId} non trouvé.` });
       }
+      const piecesQuantity = Number(item.piecesQuantity);
+      if (!Number.isFinite(piecesQuantity) || piecesQuantity <= 0 || !PRODUCT_UNITS.includes(item.piecesUnit)) {
+        return res.status(400).json({ message: "Chaque article doit avoir un nombre de pièces et une unité valides." });
+      }
+      const price = Number(item.price);
+      if (!Number.isFinite(price) || price < 0) {
+        return res.status(400).json({ message: "Le prix global doit être un nombre positif ou nul." });
+      }
     }
 
     // Les valeurs modifiées dans le brouillon sont appliquées au catalogue avant
     // d'être mémorisées dans la commande et dans le stock.
-    items.forEach(item => {
+    const preparedItems = items.map(item => {
       const product = productsMap[item.productId];
       const orderPrice = Number(item.price);
-      if (Number.isFinite(orderPrice) && orderPrice >= 0 && orderPrice < Number(product.purchaseTotalPrice || 0)) {
-        product.purchaseTotalPrice = orderPrice;
-      }
-      if (typeof item.pieces === "string" || typeof item.pieces === "number") {
-        product.pieces = item.pieces;
-      }
+      const units = normalizeProductUnits(item);
+      product.purchaseTotalPrice = orderPrice;
+      product.piecesQuantity = units.piecesQuantity;
+      product.piecesUnit = units.piecesUnit;
+      product.purchasePrice = calculatePurchasePrice(orderPrice, units.piecesQuantity);
+      delete product.pieces;
+      return {
+        ...item,
+        piecesQuantity: units.piecesQuantity,
+        piecesUnit: units.piecesUnit,
+        purchasePrice: product.purchasePrice
+      };
     });
     writeProducts(catalog);
 
@@ -104,15 +119,17 @@ router.post("/batch", async (req, res) => {
     const batchStamp = Date.now();
 
     await updateDb((data) => {
-      items.forEach((item, index) => {
+      preparedItems.forEach((item, index) => {
         const product = productsMap[item.productId];
         const orderedPrice = Number(item.price);
+        const stockChange = item.piecesQuantity * Number(item.quantity);
         const order = {
           id: `${batchStamp}-${index}`,
           productId: item.productId,
           quantity: Number(item.quantity),
-          purchaseTotalPrice: Number.isFinite(orderedPrice) ? orderedPrice : (product.purchaseTotalPrice || 0),
-          pieces: product.pieces || "",
+          purchaseTotalPrice: orderedPrice,
+          piecesQuantity: item.piecesQuantity,
+          piecesUnit: item.piecesUnit,
           supplier: product.supplier || "",
           productName: product.brand_name || "",
           date: new Date().toISOString(),
@@ -124,15 +141,17 @@ router.post("/batch", async (req, res) => {
         const stock = data.stocks.find(s => String(s.id) === String(product.id));
         if (stock) {
           const stockBefore = Number(stock.stock) || 0;
-          stock.stock = stockBefore + Number(item.quantity);
-          stock.purchaseTotalPrice = product.purchaseTotalPrice || 0;
-          stock.purchasePrice = product.purchasePrice || 0;
+          stock.stock = stockBefore + stockChange;
+          stock.purchaseTotalPrice = orderedPrice;
+          stock.purchasePrice = item.purchasePrice;
           stock.salePrice = product.salePrice || 0;
-          stock.pieces = product.pieces || "";
+          stock.piecesQuantity = item.piecesQuantity;
+          stock.piecesUnit = item.piecesUnit;
+          delete stock.pieces;
           stock.history = stock.history || [];
-          stock.history.push({ date: order.date, change: Number(item.quantity), stockBefore, purchasePrice: stock.purchasePrice, salePrice: stock.salePrice, note: "Commande fournisseur" });
+          stock.history.push({ date: order.date, change: stockChange, stockBefore, purchasePrice: stock.purchasePrice, salePrice: stock.salePrice, note: "Commande fournisseur" });
         } else {
-          data.stocks.push({ id: product.id, name: product.brand_name, category: product.generic_name, pieces: product.pieces || "", purchaseTotalPrice: product.purchaseTotalPrice || 0, purchasePrice: product.purchasePrice || 0, salePrice: product.salePrice || 0, stock: Number(item.quantity), sold: 0, history: [{ date: order.date, change: Number(item.quantity), stockBefore: 0, purchasePrice: product.purchasePrice || 0, salePrice: product.salePrice || 0, note: "Première commande fournisseur" }] });
+          data.stocks.push({ id: product.id, name: product.brand_name, category: product.generic_name, piecesQuantity: item.piecesQuantity, piecesUnit: item.piecesUnit, purchaseTotalPrice: orderedPrice, purchasePrice: item.purchasePrice, salePrice: product.salePrice || 0, stock: stockChange, sold: 0, history: [{ date: order.date, change: stockChange, stockBefore: 0, purchasePrice: item.purchasePrice, salePrice: product.salePrice || 0, note: "Première commande fournisseur" }] });
         }
       });
     });
