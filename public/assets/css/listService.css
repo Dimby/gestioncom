@@ -66,3 +66,20 @@ button#cancelAddService {
     color: gray;
     padding: 8px 20px;
 }
+#serviceForm .select2.select2-container {
+    width: 100% !important;
+}
+
+#serviceForm .select2-selection--single {
+    height: 36px;
+    border-radius: 6px;
+    border: 1px solid #e2e2e2;
+}
+
+#serviceForm .select2-selection__rendered {
+    line-height: 34px;
+}
+
+#serviceForm .select2-selection__arrow {
+    height: 34px;
+}

@@ -364,11 +364,18 @@ function openOrderModal() {
     modal = document.createElement("div");
     modal.id = "orderModal";
     modal.style.cssText = "display:none;position:fixed;z-index:1000;inset:0;background:rgba(0,0,0,.5);justify-content:center;align-items:center";
-    modal.innerHTML = `<div style="background:#fff;padding:20px;border-radius:10px;max-height:730px;overflow:auto"><h3 style="margin-top: 0">Nouvelle commande</h3><table id="orderTable"><thead><tr><th>Produit</th><th>Fournisseur</th><th>Prix global</th><th>Nombre</th><th>Unité</th><th>Quantité commandée</th><th></th></tr></thead><tbody id="orderBody"></tbody></table><p><button id="addOrderLine">+ Ajouter ligne</button></p><strong>Total : <span id="orderTotal">0</span></strong><p><button id="closeOrderModal">Fermer</button><button id="sendOrderModal">Confirmer</button></p></div>`;
+    modal.innerHTML = `<div style="background:#fff;padding:20px;border-radius:10px;max-height:730px;overflow:auto"><div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><h3 style="margin:0">Nouvelle commande</h3><button type="button" id="resetOrderDraft" title="Réinitialiser" aria-label="Réinitialiser" style="background:#f2f2f2;color:gray;padding:6px 8px;line-height:1">↺</button></div><table id="orderTable"><thead><tr><th>Produit</th><th>Fournisseur</th><th>Prix global</th><th>Nombre</th><th>Unité</th><th>Quantité commandée</th><th></th></tr></thead><tbody id="orderBody"></tbody></table><p><button id="addOrderLine">+ Ajouter ligne</button></p><strong>Total : <span id="orderTotal">0</span></strong><p><button id="closeOrderModal">Fermer</button><button id="sendOrderModal">Confirmer</button></p></div>`;
     document.body.appendChild(modal);
     modal.querySelector("#addOrderLine").onclick = () => addOrderLine();
     modal.querySelector("#closeOrderModal").onclick = () => { saveOrderDraft(); modal.style.display = "none"; };
     modal.querySelector("#sendOrderModal").onclick = sendOrder;
+    modal.querySelector("#resetOrderDraft").onclick = () => {
+      localStorage.removeItem(ORDER_DRAFT_KEY);
+      const orderBody = modal.querySelector("#orderBody");
+      orderBody.querySelectorAll(".order-product-select").forEach(sel => $(sel).select2("destroy"));
+      orderBody.innerHTML = "";
+      addOrderLine();
+    };
     modal.onclick = e => { if (e.target === modal) { saveOrderDraft(); modal.style.display = "none"; } };
   }
   const body = modal.querySelector("#orderBody"); body.innerHTML = "";

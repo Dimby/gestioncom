@@ -164,6 +164,8 @@ function productModal() {
 		if (e.target === m) m.style.display = "none";
 	};
 }
+const PRODUCT_FORM_DRAFT = "productFormDraft";
+const PRODUCT_FORM_FIELDS = ["productName", "productType", "productSupplier", "productTotalPrice", "productPiecesQuantity", "productPiecesUnit", "productSalePrice"];
 function openProductModal(p = null) {
 	productModal();
 	const modal = document.getElementById("editProductModal"),
@@ -183,6 +185,27 @@ function openProductModal(p = null) {
 		q("productPiecesQuantity").value,
 	);
 	q("productSalePrice").value = p?.salePrice || "";
+	if (!p) {
+		try {
+			const draft = JSON.parse(localStorage.getItem(PRODUCT_FORM_DRAFT) || "{}");
+			PRODUCT_FORM_FIELDS.forEach((id) => {
+				if (draft[id] !== undefined) q(id).value = draft[id];
+			});
+		} catch {}
+		q("productPurchasePrice").value = purchasePrice(
+			q("productTotalPrice").value,
+			q("productPiecesQuantity").value,
+		);
+	}
+	const saveProductDraft = () => {
+		if (p) return;
+		localStorage.setItem(
+			PRODUCT_FORM_DRAFT,
+			JSON.stringify(Object.fromEntries(PRODUCT_FORM_FIELDS.map((id) => [id, q(id).value]))),
+		);
+	};
+	q("editProductForm").oninput = saveProductDraft;
+	q("editProductForm").onchange = saveProductDraft;
 	const updatePurchasePrice = () => {
 		const amount = purchasePrice(q("productTotalPrice").value, q("productPiecesQuantity").value);
 		q("productPurchasePrice").value = amount;
@@ -209,6 +232,7 @@ function openProductModal(p = null) {
 		}),
 			out = await r.json();
 		if (!r.ok) return alert(out.message || "Erreur");
+		if (!p) localStorage.removeItem(PRODUCT_FORM_DRAFT);
 		modal.style.display = "none";
 		await reloadProducts();
 	};

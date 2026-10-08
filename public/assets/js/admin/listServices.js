@@ -8,6 +8,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+const SERVICE_FORM_DRAFT = "serviceFormDraft";
+const SERVICE_FORM_FIELDS = ["serviceName", "serviceProduit", "servicePrice", "serviceInfo"];
+
 function openServiceCreateModal() {
   let modal = document.getElementById("addServiceModal");
   if (!modal) {
@@ -24,12 +27,26 @@ function openServiceCreateModal() {
       const res = await fetch("/api/services", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(service) });
       const result = await res.json();
       if (!res.ok) return alert(result.message || "Erreur lors de l'enregistrement.");
+      localStorage.removeItem(SERVICE_FORM_DRAFT);
       modal.style.display = "none"; renderServices();
     };
+    const saveServiceDraft = () => localStorage.setItem(SERVICE_FORM_DRAFT, JSON.stringify(Object.fromEntries(SERVICE_FORM_FIELDS.map(id => [id, modal.querySelector("#" + id).value]))));
+    modal.querySelector("#serviceForm").oninput = saveServiceDraft;
+    modal.querySelector("#serviceForm").onchange = saveServiceDraft;
+    $(modal.querySelector("#serviceProduit")).select2({
+      placeholder: "Sélectionner un produit",
+      width: "100%",
+      dropdownParent: $(modal.firstElementChild)
+    }).on("change", saveServiceDraft);
   }
   const select = modal.querySelector("#serviceProduit");
   select.innerHTML = '<option value="">Sélectionner un produit</option>';
   medocsData.forEach(product => select.add(new Option(product.brand_name, product.id)));
+  try {
+    const draft = JSON.parse(localStorage.getItem(SERVICE_FORM_DRAFT) || "{}");
+    SERVICE_FORM_FIELDS.forEach(id => { if (draft[id] !== undefined) modal.querySelector("#" + id).value = draft[id]; });
+  } catch {}
+  $(select).trigger("change.select2"); // resynchronise select2 avec les options/valeur restaurées
   modal.style.display = "flex";
 }
 

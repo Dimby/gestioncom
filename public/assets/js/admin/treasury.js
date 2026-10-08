@@ -139,7 +139,24 @@ document.addEventListener('DOMContentLoaded', async function() {
     };
   }
 
-  // Fonction pour mettre à jour le tableau journalier (inchangée)
+  // Solde cumulé à la fin de la veille de `date` (cache hebdomadaire du lundi précédent + jours restants)
+  function getBalanceBefore(date) {
+    const monday = new Date(date);
+    monday.setHours(0, 0, 0, 0);
+    monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+    const prevKey = formatDateKey(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() - 7));
+    let balance = weeklyFinalBalances[prevKey] || 0;
+    const stop = new Date(date);
+    stop.setHours(0, 0, 0, 0);
+    for (const d = new Date(monday); d < stop; d.setDate(d.getDate() + 1)) {
+      const m = aggregatedMovements[formatDateKey(d)] || { spent: 0, disburse: 0 };
+      balance += calculateDayRevenue(d) - ((m.spent || 0) + (m.disburse || 0));
+    }
+    return balance;
+  }
+
+  // Fonction pour mettre à jour le tableau journalier
+
   function updateTreasuryTable(startDate, endDate) {
     const tableBody = document.getElementById('treasuryTableBody');
     if (!tableBody) return;
@@ -152,12 +169,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     let totalDecaissement = 0;
     let soldeFinale = 0;
 
-    const previousWeekEndDate = new Date(startDate);
-    previousWeekEndDate.setDate(previousWeekEndDate.getDate() - 1);
-    const previousWeekStartKey = formatDateKey(new Date(previousWeekEndDate.getTime() - 6 * 24 * 60 * 60 * 1000));
-    
-    // Lit le cache pré-calculé
-    let initialReport = weeklyFinalBalances[previousWeekStartKey] || 0;
+    // Report = solde cumulé de tout ce qui précède startDate (la semaine affichée peut être tronquée par le mois)
+    let initialReport = getBalanceBefore(startDate);
     let previousDaySoldeFinal = initialReport;
 
     const today = new Date();
@@ -166,9 +179,16 @@ document.addEventListener('DOMContentLoaded', async function() {
     let currentDay = new Date(startDate);
     let daysProcessed = 0;
 
-    while (daysProcessed < 7) {
+    const lastDay = new Date(endDate);
+    lastDay.setHours(0, 0, 0, 0);
+
+    while (currentDay <= lastDay) {
       const day = new Date(currentDay);
       if (day > today) break;
+      if (day.getDay() === 0) { // le dimanche est exclu du tableau
+        currentDay.setDate(currentDay.getDate() + 1);
+        continue;
+      }
 
       const marginData = calculateDayMargin(day);
       const dayRecettes = calculateDayRevenue(day);
@@ -184,11 +204,10 @@ document.addEventListener('DOMContentLoaded', async function() {
       totalDecaissement += dayDecaissement;
 
       let dayReport = previousDaySoldeFinal;
-      const daySolde = (dayReport + dayRecettes) - dayDepenses;
+      const daySolde = (dayReport + dayRecettes) - (dayDepenses + dayDisburse);
       totalSolde += daySolde;
-      const daySoldeFinal = daySolde - dayDecaissement;
-      previousDaySoldeFinal = daySoldeFinal;
-      soldeFinale = daySoldeFinal;
+      previousDaySoldeFinal = daySolde;
+      soldeFinale = daySolde;
 
       const row = document.createElement('tr');
       row.innerHTML = `
@@ -215,15 +234,6 @@ document.addEventListener('DOMContentLoaded', async function() {
       tableBody.appendChild(row);
     }
     
-    // (Optionnel) On peut mettre à jour le cache si le jour 'today' est dans cette semaine
-    if (daysProcessed > 0) {
-        const currentWeekStartKey = formatDateKey(startDate);
-        // On ne met à jour que si le solde a pu changer (si 'today' est dans la semaine)
-        if (new Date() >= startDate && new Date() <= endDate) {
-             weeklyFinalBalances[currentWeekStartKey] = soldeFinale;
-        }
-    }
-
     if (document.getElementById('totalRecettes')) document.getElementById('totalRecettes').textContent = formatAriary(totalRecettes);
     if (document.getElementById('totalDepenses')) document.getElementById('totalDepenses').textContent = formatAriary(totalDepenses);
     if (document.getElementById('totalDisburse')) document.getElementById('totalDisburse').textContent = formatAriary(totalDisburse);
@@ -314,7 +324,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     const availableWeeks = weeks.filter(week => {
       const weekStart = new Date(week.start);
       weekStart.setHours(0,0,0,0);
-      return weekStart <= today;
+      // une semaine réduite au seul dimanche n'aurait aucune ligne (dimanche exclu)
+      const onlySunday = weekStart.getDay() === 0 && week.end.getTime() === week.start.getTime();
+      return weekStart <= today && !onlySunday;
     });
 
     availableWeeks.forEach((week, index) => {

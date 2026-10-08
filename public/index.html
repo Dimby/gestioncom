@@ -37,7 +37,16 @@
                 
                 <div id="tabContentService">
                     <div class="form-section">
-                        <h2 class="title">Votre vente de service d'aujourd'hui</h2>
+                        <div class="title-row" style="display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap">
+                            <h2 class="title">Votre vente de service d'aujourd'hui</h2>
+                            <div class="today-toggle" style="display:flex;align-items:center;gap:8px">
+                                <span>Aujourd'hui</span>
+                                <label class="switch">
+                                    <input type="checkbox" class="today-toggle-input" data-target="serviceDate">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </div>
                         <form id="serviceSaleForm">
                             <div class="form-group-01">
                                 <select id="serviceSelect" class="js-example-basic-single" required>
@@ -63,7 +72,16 @@
 
                 <div id="tabContentProduit" style="display:none;">
                     <div class="form-section">
-                        <h2 class="title">Votre vente de produit d'aujourd'hui</h2>
+                        <div class="title-row" style="display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap">
+                            <h2 class="title">Votre vente de produit d'aujourd'hui</h2>
+                            <div class="today-toggle" style="display:flex;align-items:center;gap:8px">
+                                <span>Aujourd'hui</span>
+                                <label class="switch">
+                                    <input type="checkbox" class="today-toggle-input" data-target="productDate">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </div>
                         <div class="forms">
                             <form id="itemForm">
                                 <select name="produits" id="produits" class="js-example-basic-single">
@@ -90,7 +108,16 @@
 
                 <div id="tabContentExpenses" style="display:none;">
                     <div class="form-section">
-                        <h2 class="title">Mouvements d'aujourd'hui</h2>
+                        <div class="title-row" style="display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap">
+                            <h2 class="title">Mouvements d'aujourd'hui</h2>
+                            <div class="today-toggle" style="display:flex;align-items:center;gap:8px">
+                                <span>Aujourd'hui</span>
+                                <label class="switch">
+                                    <input type="checkbox" class="today-toggle-input" data-target="expenseDate">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </div>
                         <form id="expensesForm">
                             <div style="margin-bottom: 15px;">
                                 <label for="expenseDate" style="display:block; margin-bottom:5px;">Date du mouvement :</label>

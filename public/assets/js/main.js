@@ -31,6 +31,28 @@ $(document).ready(async function() {
   saveDate('productDate');
   saveDate('expenseDate');
 
+  // Toggles "Aujourd'hui" : synchronisés avec l'input date correspondant
+  const localToday = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+  document.querySelectorAll('.today-toggle-input').forEach((toggle) => {
+    const input = document.getElementById(toggle.dataset.target);
+    if (!input) return;
+    const sync = () => { toggle.checked = input.value === localToday(); };
+    sync();
+    input.addEventListener('change', sync);
+    toggle.addEventListener('change', () => {
+      if (toggle.checked) {
+        input.value = localToday();
+        localStorage.setItem(input.id, input.value);
+        input.dispatchEvent(new Event('change'));
+      } else {
+        sync(); // on ne peut pas "décocher" : choisir une autre date via le calendrier
+      }
+    });
+  });
+
   // Fonction utilitaire pour combiner la Date choisie avec l'Heure actuelle
   // Cela permet de garder un tri chronologique correct même si on change le jour
   const getFullDateFromInput = (inputId) => {
@@ -420,7 +442,9 @@ $(document).ready(async function() {
         
         if (response.ok) {
           alert('Dépenses enregistrées avec succès!');
+          const keptDate = document.getElementById('expenseDate').value;
           expensesForm.reset();
+          document.getElementById('expenseDate').value = keptDate;
           expensesContainer.innerHTML = `
             <div class="expense-item">
               <div class="form-group-01">

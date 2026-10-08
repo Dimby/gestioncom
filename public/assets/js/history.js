@@ -185,14 +185,66 @@ function setupEventListeners() {
 }
 
 // AJOUT : Fonction pour mettre à jour l'affichage de la date
+function toDateInputValue(date) {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+// Crée (une seule fois) le calendrier natif superposé au span#currentDateDisplay
+function ensureDatePicker(displaySpan) {
+    let input = displaySpan.querySelector('#historyDatePicker');
+    if (input) return input;
+
+    displaySpan.style.position = 'relative';
+    displaySpan.style.cursor = 'pointer';
+    displaySpan.textContent = '';
+
+    const label = document.createElement('span');
+    label.id = 'currentDateLabel';
+    displaySpan.appendChild(label);
+
+    input = document.createElement('input');
+    input.type = 'date';
+    input.id = 'historyDatePicker';
+    input.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0;';
+    displaySpan.appendChild(input);
+
+    input.addEventListener('click', () => { try { input.showPicker(); } catch (e) {} });
+    input.addEventListener('change', () => {
+        if (!input.value) return;
+        const [y, m, d] = input.value.split('-').map(Number);
+        const picked = new Date(y, m - 1, d);
+        picked.setHours(0, 0, 0, 0);
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        if (picked > today) { // aucune date postérieure
+            input.value = toDateInputValue(selectedDate);
+            return;
+        }
+        selectedDate = picked;
+        localStorage.setItem('historySelectedDate', selectedDate.toISOString());
+        const isToday = selectedDate.getTime() === today.getTime();
+        localStorage.setItem('historyTodaySwitch', String(isToday));
+        const todayFilterSwitch = document.getElementById('todayFilterSwitch');
+        if (todayFilterSwitch) todayFilterSwitch.checked = isToday;
+        updateDateDisplay();
+        refreshUI();
+    });
+    return input;
+}
+
+// AJOUT : Fonction pour mettre à jour l'affichage de la date
 function updateDateDisplay() {
     const displaySpan = document.getElementById('currentDateDisplay');
     const nextBtn = document.getElementById('nextDayBtn');
     if (displaySpan) {
-        // Format DD/MM
+        const picker = ensureDatePicker(displaySpan);
+        // Format Lun. 05/10
+        const dayNames = ['Dim.', 'Lun.', 'Mar.', 'Mer.', 'Jeu.', 'Ven.', 'Sam.'];
         const day = String(selectedDate.getDate()).padStart(2, '0');
         const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
-        displaySpan.textContent = `${day}/${month}`;
+        displaySpan.querySelector('#currentDateLabel').textContent = `${dayNames[selectedDate.getDay()]} ${day}/${month}`;
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        picker.max = toDateInputValue(today);
+        picker.value = toDateInputValue(selectedDate);
     }
     // Désactive "Suivant" si on est déjà aujourd'hui
     if (nextBtn) {
