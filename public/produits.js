@@ -131,9 +131,12 @@
       "id": "1755179443163",
       "brand_name": "Films plastiques pour plastification",
       "generic_name": "lamination_film",
-      "piecesQuantity": 1,
+      "piecesQuantity": 100,
       "piecesUnit": "piece",
-      "purchasePrice": 0
+      "purchasePrice": 100,
+      "supplier": "Suprem Center",
+      "purchaseTotalPrice": 10000,
+      "salePrice": 200
     },
     {
       "id": "1755179443164",
@@ -210,7 +213,7 @@
     },
     {
       "id": "1755179443173",
-      "brand_name": "Stylo - Schneider",
+      "brand_name": "Stylo - Schneider - Bleu",
       "generic_name": "supplies",
       "supplier": "MAGEMAD Tsaralalana",
       "purchasePrice": 600,

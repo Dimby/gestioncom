@@ -70,6 +70,21 @@ document.addEventListener('DOMContentLoaded', async function() {
     return `${day}/${month}/${year}`;
   }
 
+  function isPCommandeExcluded() {
+    return document.getElementById('excludePCommandeSwitch')?.checked === true;
+  }
+
+  function getEffectiveDisburse(movements) {
+    return isPCommandeExcluded() ? 0 : (movements.disburse || 0);
+  }
+
+  function updatePCommandeVisibility() {
+    const isVisible = !isPCommandeExcluded();
+    document.querySelectorAll('.p-commande-column').forEach(element => {
+      element.style.display = isVisible ? '' : 'none';
+    });
+  }
+
   // Fonction pour calculer les recettes d'un jour (inchangée)
   function calculateDayRevenue(date) {
     const year = date.getFullYear();
@@ -150,7 +165,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     stop.setHours(0, 0, 0, 0);
     for (const d = new Date(monday); d < stop; d.setDate(d.getDate() + 1)) {
       const m = aggregatedMovements[formatDateKey(d)] || { spent: 0, disburse: 0 };
-      balance += calculateDayRevenue(d) - ((m.spent || 0) + (m.disburse || 0));
+      balance += calculateDayRevenue(d) - ((m.spent || 0) + getEffectiveDisburse(m));
     }
     return balance;
   }
@@ -168,6 +183,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     let totalSolde = 0;
     let totalDecaissement = 0;
     let soldeFinale = 0;
+    let totalMargin = 0;
 
     // Report = solde cumulé de tout ce qui précède startDate (la semaine affichée peut être tronquée par le mois)
     let initialReport = getBalanceBefore(startDate);
@@ -197,11 +213,12 @@ document.addEventListener('DOMContentLoaded', async function() {
       const dayKey = formatDateKey(day);
       const dayMovements = aggregatedMovements[dayKey] || { spent: 0, disburse: 0 };
       const dayDepenses = dayMovements.spent || 0;
-      const dayDisburse = dayMovements.disburse || 0;
+      const dayDisburse = getEffectiveDisburse(dayMovements);
       totalDepenses += dayDepenses;
       totalDisburse += dayDisburse;
-      const dayDecaissement = dayMovements.disburse || 0;
+      const dayDecaissement = dayDisburse;
       totalDecaissement += dayDecaissement;
+      totalMargin += marginData.total;
 
       let dayReport = previousDaySoldeFinal;
       const daySolde = (dayReport + dayRecettes) - (dayDepenses + dayDisburse);
@@ -215,7 +232,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         <td>${formatAriary(dayReport)}</td>
         <td>${formatAriary(dayRecettes)}</td>
         <td>${formatAriary(dayDepenses)}</td>
-        <td>${formatAriary(dayDisburse)}</td>
+        <td class="p-commande-column">${formatAriary(dayDisburse)}</td>
         <td>${formatAriary(daySolde)}</td>
         <td>
           [${formatAriary(marginData.product)} + ${formatAriary(marginData.service)}]
@@ -230,9 +247,18 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     if (daysProcessed === 0) {
       const row = document.createElement('tr');
-      row.innerHTML = `<td colspan="6" class="no-data">Aucune donnée disponible pour cette période</td>`;
+      row.innerHTML = `<td colspan="7" class="no-data">Aucune donnée disponible pour cette période</td>`;
       tableBody.appendChild(row);
     }
+
+    document.getElementById('totalTreasuryReport').textContent = formatAriary(initialReport);
+    document.getElementById('totalTreasuryRecettes').textContent = formatAriary(totalRecettes);
+    document.getElementById('totalTreasuryDepenses').textContent = formatAriary(totalDepenses);
+    document.getElementById('totalTreasuryDisburse').textContent = formatAriary(totalDisburse);
+    document.getElementById('totalTreasurySolde').textContent =
+      formatAriary(initialReport + totalRecettes - (totalDepenses + totalDisburse));
+    document.getElementById('totalTreasuryMargin').textContent = formatAriary(totalMargin);
+    updatePCommandeVisibility();
     
     if (document.getElementById('totalRecettes')) document.getElementById('totalRecettes').textContent = formatAriary(totalRecettes);
     if (document.getElementById('totalDepenses')) document.getElementById('totalDepenses').textContent = formatAriary(totalDepenses);
@@ -423,7 +449,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         weekRecettes += dayRecettes;
         weekDepenses += movements.spent || 0;
-        weekDisburse += movements.disburse || 0;
+        weekDisburse += getEffectiveDisburse(movements);
         weekMargin += calculateDayMargin(currentDay).total;
 
         currentDay.setDate(currentDay.getDate() + 1);
@@ -461,7 +487,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         <td>${i === 0 ? formatAriary(report) : '-'}</td>
         <td>${formatAriary(weekRecettes)}</td>
         <td>${formatAriary(weekDepenses)}</td>
-        <td>${formatAriary(weekDisburse)}</td>
+        <td class="p-commande-column">${formatAriary(weekDisburse)}</td>
         <td style="color:${colorSolde}">${formatAriary(solde)}</td>
         <td>${formatAriary(weekMargin)}</td>
       `;
@@ -481,6 +507,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     const totalSoldeElement = document.getElementById('totalRecapSolde');
     totalSoldeElement.style.color = totalSolde < 0 ? '#e74c3c' : '#27ae60';
+    updatePCommandeVisibility();
 
   } catch (error) {
     console.error("Erreur lors de la génération du récapitulatif:", error);
@@ -523,7 +550,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       const dayMovements = aggregatedMovements[dayKey] || { spent: 0, disburse: 0 };
 
       const dep = dayMovements.spent || 0;
-      const disb = dayMovements.disburse || 0;
+      const disb = getEffectiveDisburse(dayMovements);
 
       totalRecettes += dayRecettes;
       totalDepenses += dep;
@@ -661,6 +688,24 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
   });
 
+  document.getElementById('excludePCommandeSwitch').addEventListener('change', function() {
+    weeklyFinalBalances = {};
+    const earliestDate = findEarliestDate();
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+    preCalculateEntireHistory(earliestDate, today);
+    updatePCommandeVisibility();
+
+    if (document.getElementById('recapSwitch').checked) {
+      generateMonthlySummary(currentYear, currentMonth);
+    } else {
+      const weekSelector = document.getElementById('weekSelector');
+      if (weekSelector.selectedIndex >= 0) {
+        weekSelector.dispatchEvent(new Event('change'));
+      }
+    }
+  });
+
   // Inchangé, lit le cache
   document.getElementById('weekSelector').addEventListener('change', function() {
     if (this.selectedIndex < 0) return;
@@ -734,6 +779,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Le reste est inchangé
     updateMonthDisplay();
     updateWeekOptions();
+    updatePCommandeVisibility();
 
     const weekSelector = document.getElementById('weekSelector');
 

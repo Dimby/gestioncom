@@ -1,0 +1,4 @@
+# Taf :
+1. Dans treasury.js et treasury.html, je voudrai rajouter un toggle "Exclure P.Commande" à coté de toggle "Récapitulation" qui sert à cacher la colonne P.Commande. Donc il faut faire attention au calcule car la colonne sera donc masqué et on ne calcule plus cette colonne si c'est masqué.
+
+2. A la fin du tableau #treasuryTable, on ajoute une derniere ligne récapitulative : si toggle "Récapitulation" n'est pas activé, on ajoute : Total | Ici c'est le montant du Report de la premiere ligne | SUM(Recettes) | SUM(Dépenses) | SUM(P.Commande) | Montant du Report de 1ere ligne + SUM(Recettes) - (SUM(Dépenses) + SUM(P.Commande)) | SUM(Marge brute P+S). Si le toggle est actif, le total est deja en place, mais s'il ne correspond pas à ce que j'ai dit en haut, alors corrige le.
