@@ -1,21 +1,17 @@
 const express = require("express");
-const fs = require("fs");
-const path = require("path");
 const { updateDb } = require("../db");
 const { PRODUCT_UNITS, normalizeProductUnits, calculatePurchasePrice } = require("../utils/productUnits");
+const { readCatalog, writeCatalog } = require("../utils/productCatalog");
 
 const router = express.Router();
 
-const filePath = path.join(__dirname, "../public/produits.js");
-
 // utilitaires
 function readProducts() {
-  const data = fs.readFileSync(filePath, "utf-8");
-  return JSON.parse(data);
+  return readCatalog();
 }
 
 function writeProducts(data) {
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+  writeCatalog(data);
 }
 
 // GET ALL PRODUCTS

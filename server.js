@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 const path = require("path");
 const fs = require("fs");
 const multer = require("multer");
+const { readCatalog } = require("./utils/productCatalog");
 
 // Import des modules
 // On charge db.js pour lancer la migration au démarrage
@@ -24,6 +25,14 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+app.get("/produits.js", (req, res) => {
+  try {
+    res.type("application/javascript").send(JSON.stringify(readCatalog()));
+  } catch (error) {
+    console.error("Erreur lors du chargement du catalogue produit:", error);
+    res.status(500).json({ message: "Catalogue produit indisponible." });
+  }
+});
 app.use(express.static(path.join(__dirname, "public")));
 app.use(cookieParser());
 // const upload = multer({ dest: 'uploads/' }); // Pas besoin ici, géré dans admin.js

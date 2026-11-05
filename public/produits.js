@@ -35,11 +35,14 @@
     },
     {
       "id": "1755179443153",
-      "brand_name": "Chemise cartonnée - toutes couleurs",
+      "brand_name": "Papier Chemise cartonnée - toutes couleurs",
       "generic_name": "folder",
-      "piecesQuantity": 1,
+      "piecesQuantity": 50,
       "piecesUnit": "piece",
-      "purchasePrice": 0
+      "purchasePrice": 215,
+      "supplier": "MAGEMAD Tsaralalana",
+      "purchaseTotalPrice": 10750,
+      "salePrice": 400
     },
     {
       "id": "1755179443154",
@@ -54,19 +57,25 @@
     },
     {
       "id": "1755179443156",
-      "brand_name": "Bristol - fotsy",
+      "brand_name": "Papier Bristol - Fotsy",
       "generic_name": "special_paper",
-      "piecesQuantity": 1,
+      "piecesQuantity": 100,
       "piecesUnit": "piece",
-      "purchasePrice": 0
+      "purchasePrice": 140,
+      "supplier": "",
+      "purchaseTotalPrice": 14000,
+      "salePrice": 400
     },
     {
       "id": "1755179443157",
-      "brand_name": "Papier photo A4 - 230g (photo)",
+      "brand_name": "Papier glacé A4 - 230g (photo)",
       "generic_name": "photo_paper",
-      "piecesQuantity": 1,
+      "piecesQuantity": 100,
       "piecesUnit": "piece",
-      "purchasePrice": 0
+      "purchasePrice": 200,
+      "supplier": "",
+      "purchaseTotalPrice": 20000,
+      "salePrice": 400
     },
     {
       "id": "1755179443158",
@@ -86,35 +95,25 @@
     },
     {
       "id": "1755179443160",
-      "brand_name": "Spirale 6mm - 20 feuilles",
+      "brand_name": "Spirale PM - 20 - 40 feuilles",
       "generic_name": "spiral_binding",
-      "piecesQuantity": 1,
+      "piecesQuantity": 100,
       "piecesUnit": "piece",
-      "purchasePrice": 0
+      "purchasePrice": 300,
+      "supplier": "",
+      "purchaseTotalPrice": 30000,
+      "salePrice": 500
     },
     {
       "id": "1755179443161",
-      "brand_name": "Spirale 10mm - 40 feuilles (Mainty)",
+      "brand_name": "Spirale MM et GM - 50 feuilles et plus",
       "generic_name": "spiral_binding",
-      "piecesQuantity": 1,
+      "piecesQuantity": 100,
       "piecesUnit": "piece",
-      "purchasePrice": 0
-    },
-    {
-      "id": "1755179443161",
-      "brand_name": "Spirale 10mm - 40 feuilles (Fotsy)",
-      "generic_name": "spiral_binding",
-      "piecesQuantity": 1,
-      "piecesUnit": "piece",
-      "purchasePrice": 0
-    },
-    {
-      "id": "1755179443161",
-      "brand_name": "Spirale 12mm - 90 feuilles",
-      "generic_name": "spiral_binding",
-      "piecesQuantity": 1,
-      "piecesUnit": "piece",
-      "purchasePrice": 0
+      "purchasePrice": 300,
+      "supplier": "",
+      "purchaseTotalPrice": 30000,
+      "salePrice": 600
     },
     {
       "id": "1755179443162",
@@ -140,19 +139,25 @@
     },
     {
       "id": "1755179443164",
-      "brand_name": "Agrafe DL 0335",
+      "brand_name": "Agrafe",
       "generic_name": "staple",
-      "piecesQuantity": 1,
+      "piecesQuantity": 10,
       "piecesUnit": "piece",
-      "purchasePrice": 0
+      "purchasePrice": 1000,
+      "supplier": "",
+      "purchaseTotalPrice": 10000,
+      "salePrice": 1500
     },
     {
       "id": "1755179443165",
       "brand_name": "Papier millimetré",
       "generic_name": "office_paper",
-      "piecesQuantity": 1,
+      "piecesQuantity": 100,
       "piecesUnit": "piece",
-      "purchasePrice": 0
+      "purchasePrice": 100,
+      "supplier": "MAGEMAD Tsaralalana",
+      "purchaseTotalPrice": 10000,
+      "salePrice": 300
     },
     {
       "id": "1755179443166",
@@ -299,19 +304,8 @@
       "purchasePrice": 0
     },
     {
-      "id": "1755179443182",
-      "brand_name": "Crayon Rose 2B (TATAMAX)",
-      "generic_name": "supplies",
-      "supplier": "TATAMAX",
-      "purchasePrice": 292,
-      "salePrice": 500,
-      "purchaseTotalPrice": 3500,
-      "piecesQuantity": 12,
-      "piecesUnit": "piece"
-    },
-    {
       "id": "1755179443183",
-      "brand_name": "Crayon HB Pencils (TATAMAX)",
+      "brand_name": "Crayon",
       "generic_name": "supplies",
       "supplier": "TATAMAX",
       "purchasePrice": 292,
@@ -322,11 +316,14 @@
     },
     {
       "id": "1755179443184",
-      "brand_name": "Marque Page 4pièces (TATAMAX)",
+      "brand_name": "Surligneur",
       "generic_name": "supplies",
-      "piecesQuantity": 1,
+      "piecesQuantity": 4,
       "piecesUnit": "piece",
-      "purchasePrice": 0
+      "purchasePrice": 900,
+      "supplier": "TATAMAX",
+      "purchaseTotalPrice": 3600,
+      "salePrice": 2000
     },
     {
       "id": "1755179443185",
@@ -334,17 +331,20 @@
       "generic_name": "supplies",
       "piecesQuantity": 1,
       "piecesUnit": "piece",
-      "purchasePrice": 0
+      "purchasePrice": 900,
+      "supplier": "",
+      "purchaseTotalPrice": 900,
+      "salePrice": 2000
     },
     {
       "id": "1755179443186",
-      "brand_name": "Colle Bureau Ngeza - La reine",
+      "brand_name": "Colle Bureau La reine - GM",
       "generic_name": "supplies",
       "supplier": "MAGEMAD Tsaralalana",
-      "purchasePrice": 0,
-      "salePrice": 0,
-      "purchaseTotalPrice": 0,
-      "piecesQuantity": 1,
+      "purchasePrice": 1600,
+      "salePrice": 3000,
+      "purchaseTotalPrice": 9600,
+      "piecesQuantity": 6,
       "piecesUnit": "piece"
     },
     {
@@ -371,11 +371,14 @@
     },
     {
       "id": "1755179443189",
-      "brand_name": "Papier photo A5 - KODAK (photo)",
+      "brand_name": "Papier photo A5 10x15 - KODAK",
       "generic_name": "photo_paper",
-      "piecesQuantity": 1,
+      "piecesQuantity": 50,
       "piecesUnit": "piece",
-      "purchasePrice": 0
+      "purchasePrice": 60,
+      "supplier": "SUPREM CENTER - AMBANY",
+      "purchaseTotalPrice": 3000,
+      "salePrice": 200
     },
     {
       "id": "1755179443290",
@@ -598,7 +601,7 @@
     },
     {
       "id": "1770717262664",
-      "brand_name": "Sticky Note PM",
+      "brand_name": "Sticky Note - PM",
       "generic_name": "supplies",
       "supplier": "TATAMAX",
       "purchasePrice": 1500,
@@ -609,11 +612,14 @@
     },
     {
       "id": "1770717326381",
-      "brand_name": "Sticky Note PM Large",
+      "brand_name": "Sticky Note - GM",
       "generic_name": "supplies",
       "piecesQuantity": 1,
       "piecesUnit": "piece",
-      "purchasePrice": 0
+      "purchasePrice": 2000,
+      "supplier": "TATAMAX",
+      "purchaseTotalPrice": 2000,
+      "salePrice": 2500
     },
     {
       "id": "1770717366151",
@@ -639,7 +645,7 @@
     },
     {
       "id": "1772029120622",
-      "brand_name": "Colle Bureau Kely - La reine",
+      "brand_name": "Colle Bureau La reine - PM",
       "generic_name": "supplies",
       "supplier": "MAGEMAD Tsaralalana",
       "purchasePrice": 700,
@@ -733,7 +739,8 @@
       "purchasePrice": 0,
       "salePrice": 0,
       "piecesQuantity": 1,
-      "piecesUnit": "piece"
+      "piecesUnit": "piece",
+      "purchaseTotalPrice": 0
     },
     {
       "id": "1774430756404",
@@ -834,7 +841,7 @@
     },
     {
       "id": "1779103258589",
-      "brand_name": "Colle Bureau Moyen - La reine",
+      "brand_name": "Colle Bureau La reine - MM",
       "generic_name": "supplies",
       "supplier": "MAGEMAD Tsaralalana",
       "purchasePrice": 1042,

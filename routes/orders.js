@@ -1,21 +1,9 @@
 const express = require("express");
-const fs = require("fs");
-const path = require("path");
 const { readDb, updateDb } = require("../db");
 const { PRODUCT_UNITS, normalizeProductUnits, calculatePurchasePrice } = require("../utils/productUnits");
+const { readCatalog, writeCatalog } = require("../utils/productCatalog");
 
 const router = express.Router();
-
-const productsPath = path.join(__dirname, "../public/produits.js");
-
-function readProducts() {
-  const data = JSON.parse(fs.readFileSync(productsPath, "utf-8"));
-  return data.produits || [];
-}
-
-function writeProducts(data) {
-  fs.writeFileSync(productsPath, JSON.stringify(data, null, 2));
-}
 
 // GET ALL ORDERS
 router.get("/", async (req, res) => {
@@ -71,7 +59,7 @@ router.post("/batch", async (req, res) => {
       return res.status(400).json({ message: "Tableau d'articles requis." });
     }
 
-    const catalog = JSON.parse(fs.readFileSync(productsPath, "utf-8"));
+    const catalog = readCatalog();
     const products = catalog.produits || [];
     const productsMap = {};
     products.forEach(p => {
@@ -113,7 +101,7 @@ router.post("/batch", async (req, res) => {
         purchasePrice: product.purchasePrice
       };
     });
-    writeProducts(catalog);
+    writeCatalog(catalog);
 
     const orders = [];
     const batchStamp = Date.now();
