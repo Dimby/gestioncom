@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   const nextMonthBtn = document.getElementById('nextMonth');
   const periodTotalEl = document.getElementById('periodTotal');
   const periodLabelEl = document.getElementById('periodLabel');
+  const yearTotalEl = document.getElementById('yearTotal');
 
   // --- Chargement des données ---
   async function loadMvola() {
@@ -102,6 +103,11 @@ document.addEventListener('DOMContentLoaded', async function () {
     return sumBetween(new Date(year, month, 1), new Date(year, month + 1, 0));
   }
 
+  // Somme annuelle : total de tous les mois de l'année affichée.
+  function yearTotal(year) {
+    return sumBetween(new Date(year, 0, 1), new Date(year, 11, 31));
+  }
+
   // --- Navigation mois ---
   function updateNavigationButtons() {
     const now = new Date();
@@ -143,24 +149,19 @@ document.addEventListener('DOMContentLoaded', async function () {
     return weeks;
   }
 
-  // --- Mise en évidence du total (semaine / mois) ---
+  // --- Indicateurs (blocs KPI) : total annuel + total de la période ---
   function updateSummary() {
+    if (yearTotalEl) yearTotalEl.textContent = formatAr(yearTotal(currentYear));
+
     const mode = periodSelector.value;
     if (mode === 'month') {
-      periodLabelEl.textContent = `Total du mois (${monthNames[currentMonth]} ${currentYear})`;
+      periodLabelEl.textContent = 'Montant du mois';
       periodTotalEl.textContent = formatAr(monthTotal(currentYear, currentMonth));
     } else {
       const weeks = getWeeksInMonth(currentYear, currentMonth);
       const week = weeks[weekSelector.selectedIndex] || weeks[weeks.length - 1];
-      if (week) {
-        const start = `${week.start.getDate()} ${monthNames[week.start.getMonth()]}`;
-        const end = `${week.end.getDate()} ${monthNames[week.end.getMonth()]}`;
-        periodLabelEl.textContent = `Total de la semaine (${start} - ${end})`;
-        periodTotalEl.textContent = formatAr(sumBetween(week.start, week.end));
-      } else {
-        periodLabelEl.textContent = 'Total de la semaine';
-        periodTotalEl.textContent = formatAr(0);
-      }
+      periodLabelEl.textContent = 'Montant de la semaine';
+      periodTotalEl.textContent = formatAr(week ? sumBetween(week.start, week.end) : 0);
     }
   }
 

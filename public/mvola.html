@@ -23,11 +23,6 @@
             <div class="titre">
                 <h1>Mvola</h1>
                 <div class="actions">
-                    <!-- Total mis en évidence (semaine / mois), à gauche de la navigation -->
-                    <div class="mvola-summary">
-                        <span class="mvola-summary-label" id="periodLabel"></span>
-                        <span class="mvola-summary-total" id="periodTotal">0 Ar</span>
-                    </div>
                     <div class="month-navigation">
                         <button id="prevMonth" class="month-nav-btn">&lt;</button>
                         <span id="currentMonthDisplay"></span>
@@ -41,19 +36,31 @@
                 </div>
             </div>
 
-            <!-- Saisie rapide : un champ + un bouton, juste au-dessus du calendrier -->
-            <div class="mvola-quick-add">
-                <form id="mvolaForm">
-                    <div class="mvola-field">
-                        <label for="mvolaDate">Date</label>
-                        <input type="date" id="mvolaDate" required>
+            <!-- Deux blocs façon KPI : saisie rapide à gauche, totaux à droite -->
+            <div class="mvola-top">
+                <div class="mvola-quick-add">
+                    <form id="mvolaForm">
+                        <div class="mvola-field">
+                            <label for="mvolaDate">Date</label>
+                            <input type="date" id="mvolaDate" required>
+                        </div>
+                        <div class="mvola-field">
+                            <label for="mvolaAmount">Total des transactions du jour (Ar)</label>
+                            <input type="number" id="mvolaAmount" min="0" placeholder="Montant du jour" required>
+                        </div>
+                        <button type="submit">Enregistrer</button>
+                    </form>
+                </div>
+                <div class="mvola-stats">
+                    <div class="mvola-stat">
+                        <span class="mvola-stat-label">Montant total</span>
+                        <span class="mvola-stat-value" id="yearTotal">0 Ar</span>
                     </div>
-                    <div class="mvola-field">
-                        <label for="mvolaAmount">Total des transactions du jour (Ar)</label>
-                        <input type="number" id="mvolaAmount" min="0" placeholder="Montant du jour" required>
+                    <div class="mvola-stat">
+                        <span class="mvola-stat-label" id="periodLabel">Montant du mois</span>
+                        <span class="mvola-stat-value" id="periodTotal">0 Ar</span>
                     </div>
-                    <button type="submit">Enregistrer</button>
-                </form>
+                </div>
             </div>
 
             <!-- Calendrier des mouvements -->

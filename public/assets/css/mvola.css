@@ -4,8 +4,17 @@
   padding: 20px;
 }
 
+/* Ligne du haut : deux blocs façon KPI (saisie à gauche, totaux à droite) */
+.mvola-top {
+  display: flex;
+  gap: 20px;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+
 /* Carte de saisie rapide (vendeur) : un champ + un bouton tout en haut */
 .mvola-quick-add {
+  flex: 1 1 420px;
   background: #fff;
   box-shadow: 0 2px 8px #ececec;
   border-radius: 10px;
@@ -47,24 +56,36 @@
   padding: 10px 24px;
 }
 
-/* Total mis en évidence (semaine / mois) : compact, à gauche de la navigation */
-.mvola-summary {
+/* Bloc des totaux (façon KPI) : total annuel + total de la période */
+.mvola-stats {
+  flex: 1 1 320px;
+  background: #fff;
+  box-shadow: 0 2px 8px #ececec;
+  border-radius: 10px;
+  padding: 20px;
   display: flex;
-  flex-direction: row;
+  gap: 20px;
   align-items: center;
-  gap: 10px;
-  line-height: 1.2;
+  justify-content: space-around;
+  flex-wrap: wrap;
 }
 
-.mvola-summary .mvola-summary-label {
-  font-size: 12px;
-  color: #777;
+.mvola-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: center;
 }
 
-.mvola-summary .mvola-summary-total {
-  font-size: 18px;
+.mvola-stat-label {
+  font-size: 13px;
+  color: #555;
+}
+
+.mvola-stat-value {
+  font-size: 24px;
   font-weight: bold;
-  color: #081730;
+  color: #e63946;
 }
 
 /* Calendrier */
