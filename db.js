@@ -22,7 +22,7 @@ function withDbLock(fn) {
 function emptyDb() {
   return {
     items: [], sales: [], stocks: [], services: [],
-    historyImport: [], movements: [], orders: [], signature: ""
+    historyImport: [], movements: [], orders: [], mvola: [], signature: ""
   };
 }
 
@@ -34,6 +34,7 @@ function ensureCollections(data) {
   if (!data.historyImport) data.historyImport = [];
   if (!data.movements) data.movements = [];
   if (!data.orders) data.orders = [];
+  if (!data.mvola) data.mvola = [];
   if (!data.signature) data.signature = "";
   return data;
 }

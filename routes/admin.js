@@ -37,6 +37,10 @@ router.get('/treasury', isAdmin, (req, res) => {
   res.sendFile(path.join(__dirname, "../public/admin/treasury.html"));
 });
 
+router.get('/mvola', isAdmin, (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/admin/mvola.html"));
+});
+
 router.get('/import', isAdmin, (req, res) => {
   res.sendFile(path.join(__dirname, "../public/admin/import.html"));
 });

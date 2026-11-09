@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Mvola - Gestion Commerciale</title>
+  <link rel="stylesheet" href="/assets/css/assets.css">
+  <link rel="stylesheet" href="/assets/css/uiv2.css">
+  <link rel="stylesheet" href="/assets/css/mvola.css">
+</head>
+<body>
+  <div class="root-v2">
+    <nav id="nav-v2"></nav>
+
+    <div class="main-content" style="justify-content: flex-start; gap: 20px;">
+      <div class="titre">
+        <h1>Mvola</h1>
+        <div class="actions">
+          <!-- Total mis en évidence (semaine / mois), à gauche de la navigation -->
+          <div class="mvola-summary">
+            <span class="mvola-summary-label" id="periodLabel"></span>
+            <span class="mvola-summary-total" id="periodTotal">0 Ar</span>
+          </div>
+          <div class="month-navigation">
+            <button id="prevMonth" class="month-nav-btn">&lt;</button>
+            <span id="currentMonthDisplay"></span>
+            <button id="nextMonth" class="month-nav-btn">&gt;</button>
+          </div>
+          <select id="periodSelector">
+            <option value="week">Semaine</option>
+            <option value="month">Mois</option>
+          </select>
+          <select id="weekSelector"></select>
+        </div>
+      </div>
+
+      <!-- Saisie rapide : un champ + un bouton, juste au-dessus du calendrier -->
+      <div class="mvola-quick-add">
+        <form id="mvolaForm">
+          <div class="mvola-field">
+            <label for="mvolaDate">Date</label>
+            <input type="date" id="mvolaDate" required>
+          </div>
+          <div class="mvola-field">
+            <label for="mvolaAmount">Total des transactions du jour (Ar)</label>
+            <input type="number" id="mvolaAmount" min="0" placeholder="Montant du jour" required>
+          </div>
+          <button type="submit">Enregistrer</button>
+        </form>
+      </div>
+
+      <!-- Calendrier des mouvements -->
+      <div class="mvola-calendar" id="mvolaCalendar"></div>
+    </div>
+  </div>
+
+  <script src="/assets/js/nav-active.js"></script>
+  <script src="/assets/js/admin/nav.js"></script>
+  <script src="/assets/js/mvola.js"></script>
+</body>
+</html>

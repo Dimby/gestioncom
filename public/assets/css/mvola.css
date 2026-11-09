@@ -1,0 +1,157 @@
+/* Page Mvola (mobile money) */
+
+.main-content {
+  padding: 20px;
+}
+
+/* Carte de saisie rapide (vendeur) : un champ + un bouton tout en haut */
+.mvola-quick-add {
+  background: #fff;
+  box-shadow: 0 2px 8px #ececec;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.mvola-quick-add h2 {
+  margin-bottom: 15px;
+}
+
+.mvola-quick-add form {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.mvola-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.mvola-field label {
+  font-size: 13px;
+  color: #555;
+}
+
+.mvola-field input {
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+#mvolaAmount {
+  min-width: 220px;
+}
+
+.mvola-quick-add button {
+  padding: 10px 24px;
+}
+
+/* Total mis en évidence (semaine / mois) : compact, à gauche de la navigation */
+.mvola-summary {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  line-height: 1.2;
+}
+
+.mvola-summary .mvola-summary-label {
+  font-size: 12px;
+  color: #777;
+}
+
+.mvola-summary .mvola-summary-total {
+  font-size: 18px;
+  font-weight: bold;
+  color: #081730;
+}
+
+/* Calendrier */
+.mvola-calendar {
+  background: #fff;
+  box-shadow: 0 2px 8px #ececec;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.mvola-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.mvola-weekday {
+  text-align: center;
+  font-size: 13px;
+  font-weight: bold;
+  color: #555;
+  padding: 4px 0;
+}
+
+.mvola-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.mvola-day {
+  min-height: 72px;
+  border: 1px solid #ececec;
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+.mvola-day:hover {
+  border-color: #007bff;
+}
+
+.mvola-day.empty {
+  border: none;
+  cursor: default;
+  background: transparent;
+}
+
+.mvola-day.today {
+  border-color: #007bff;
+  box-shadow: 0 0 0 1px #007bff inset;
+}
+
+.mvola-day.has-amount {
+  background: #eef6ff;
+}
+
+.mvola-day-number {
+  font-size: 13px;
+  color: #777;
+}
+
+.mvola-day-amount {
+  font-size: 16px;
+  font-weight: bold;
+  color: #081730;
+  text-align: right;
+}
+
+.month-navigation {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.month-nav-btn {
+  padding: 4px 12px !important;
+  border-radius: 6px !important;
+}
+
+.month-nav-btn.disabled,
+.month-nav-btn:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}

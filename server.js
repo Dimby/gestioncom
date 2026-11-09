@@ -19,6 +19,7 @@ const adminRoutes = require("./routes/admin");
 const bestsellersRoutes = require("./routes/bestsellers");
 const movementsRoutes = require("./routes/movements");
 const ordersRoutes = require("./routes/orders");
+const mvolaRoutes = require("./routes/mvola");
 
 // Initialisation d'Express
 const app = express();
@@ -58,12 +59,19 @@ app.get("/login", (req, res) => {
   res.sendFile(path.join(__dirname, "public/login.html"));
 });
 
+app.get("/mvola", (req, res) => {
+  res.sendFile(path.join(__dirname, "public/mvola.html"));
+});
+
 // Routes API
 app.use("/api/items", itemsRoutes);
 app.use("/api/sales", salesRoutes);
 app.use("/api/stocks", stocksRoutes);
 app.use("/api/products", productsRoutes);
 app.use("/api/services", servicesRoutes);
+// Monté avant adminRoutes : adminRoutes est aussi monté sur "/api" et
+// expose une page "/mvola", ce qui masquerait l'API GET /api/mvola.
+app.use("/api/mvola", mvolaRoutes);
 app.use("/api", adminRoutes);  // Routes d'authentification et admin
 app.use("/admin", adminRoutes); // Pages admin
 app.use("/api/bestsellers", bestsellersRoutes);
