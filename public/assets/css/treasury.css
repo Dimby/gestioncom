@@ -1,3 +1,160 @@
 .main-content {
     padding: 20px;
 }
+
+/* ===== Bandeau KPI (jour sélectionné dans le calendrier) ===== */
+.treasury-kpis {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.treasury-kpi {
+  flex: 1 1 160px;
+  background: #fff;
+  box-shadow: 0 2px 8px #ececec;
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: center;
+}
+
+.treasury-kpi-label {
+  font-size: 13px;
+  color: #555;
+}
+
+.treasury-kpi-value {
+  font-size: 22px;
+  font-weight: bold;
+  color: #081730;
+}
+
+.treasury-kpi-value.negative {
+  color: #e74c3c;
+}
+
+/* ===== Calendrier ===== */
+.treasury-calendar {
+  background: #fff;
+  box-shadow: 0 2px 8px #ececec;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+/* 7 colonnes de jours + 1 colonne "Total semaine" */
+.treasury-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr) minmax(130px, 1.3fr);
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.treasury-weekday {
+  text-align: center;
+  font-size: 13px;
+  font-weight: bold;
+  color: #555;
+  padding: 4px 0;
+}
+
+.treasury-weekday.total {
+  color: #081730;
+}
+
+.treasury-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr) minmax(130px, 1.3fr);
+  gap: 8px;
+}
+
+.treasury-day {
+  min-height: 118px;
+  border: 1px solid #ececec;
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.treasury-day.empty {
+  border: none;
+  background: transparent;
+}
+
+.treasury-day.future {
+  background: #fafafa;
+  color: #bbb;
+}
+
+.treasury-day.today {
+  border-color: #007bff;
+}
+
+.treasury-day.has-data {
+  background: #f5faff;
+}
+
+/* Colonne de synthèse de la semaine */
+.treasury-week-total {
+  background: #eef2f7;
+  border-color: #d7dee8;
+}
+
+.treasury-week-total.has-data {
+  background: #e7edf5;
+}
+
+.treasury-week-total .treasury-day-number {
+  color: #081730;
+}
+
+.treasury-day-number {
+  font-size: 13px;
+  font-weight: bold;
+  color: #777;
+}
+
+.treasury-day-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.treasury-day-lines .t-line {
+  font-size: 12px;
+  line-height: 1.3;
+  text-align: right;
+}
+
+.t-line.recette {
+  color: #27ae60;
+}
+
+.t-line.depense {
+  color: #e74c3c;
+}
+
+.t-line.pcommande {
+  color: #8e44ad;
+}
+
+.t-line.solde {
+  font-weight: bold;
+  color: #081730;
+  border-top: 1px solid #ececec;
+  padding-top: 2px;
+  margin-top: 2px;
+}
+
+.t-line.solde.negative {
+  color: #e74c3c;
+}
+
+.t-line.marge {
+  color: #2d6cdf;
+}

@@ -1,11 +1,16 @@
 document.addEventListener('DOMContentLoaded', async function() {
   // Initialisation des variables globales
   let salesData = [];
-  let weeklyFinalBalances = {}; // Notre "cache" de soldes de fin de semaine
   let currentYear, currentMonth;
   const today = new Date();
   currentYear = today.getFullYear();
   currentMonth = today.getMonth();
+
+  const weekDayNames = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+  const monthNames = [
+    'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+    'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+  ];
 
   // Récupération des données de ventes
   try {
@@ -18,56 +23,35 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Récupérer les mouvements financiers dès le chargement de la page
   const aggregatedMovements = await getAggregatedMovements();
 
-  // ===================================================================
-  // NOUVELLE FONCTION : Trouver la date de début
-  // ===================================================================
   /**
-   * Trouve la date de la transaction la plus ancienne (vente ou mouvement)
-   * et la retourne au début de cette semaine-là (Lundi).
+   * Trouve la date de la transaction la plus ancienne (vente ou mouvement),
+   * utilisée comme point de départ du cumul "Report".
    */
   function findEarliestDate() {
-    // Par défaut, le 1er janvier de l'année en cours
     let minDate = new Date(new Date().getFullYear(), 0, 1);
 
     const salesDates = salesData
       .map(s => new Date(s.date))
       .filter(d => !isNaN(d.getTime()));
-      
+
     const movementDates = Object.keys(aggregatedMovements)
       .map(k => new Date(k))
       .filter(d => !isNaN(d.getTime()));
 
     const allDates = [...salesDates, ...movementDates];
-    
     if (allDates.length > 0) {
-      // Trouve la date la plus ancienne
       minDate = new Date(Math.min.apply(null, allDates));
     }
-    
-    // Aligne la date au Lundi de cette semaine-là
-    const dayOfWeek = minDate.getDay();
-    const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // 0=Dimanche, 1=Lundi
-    minDate.setDate(minDate.getDate() - daysToSubtract);
     minDate.setHours(0, 0, 0, 0);
-    
     return minDate;
   }
 
-  // Fonctions utilitaires (inchangées)
-  function formatAr(price) {
-    return Number(price).toLocaleString('fr-FR').replace(/\s/g, '.') + ' Ar';
-  }
+  // Fonctions utilitaires
   function formatAriary(amount) {
-    return `${amount.toLocaleString('fr-FR').replace(/\s/g, '.')} Ar`;
+    return `${Number(amount).toLocaleString('fr-FR').replace(/\s/g, '.')} Ar`;
   }
   function formatDateKey(date) {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-  }
-  function formatDateDisplay(date) {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = String(date.getFullYear()).slice(-2);
-    return `${day}/${month}/${year}`;
   }
 
   function isPCommandeExcluded() {
@@ -85,7 +69,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   }
 
-  // Fonction pour calculer les recettes d'un jour (inchangée)
+  // Recettes d'un jour
   function calculateDayRevenue(date) {
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -110,17 +94,15 @@ document.addEventListener('DOMContentLoaded', async function() {
     return total;
   }
 
+  // Marge brute d'un jour
   function calculateDayMargin(date) {
-
     const year = date.getFullYear();
     const month = date.getMonth();
     const day = date.getDate();
 
     const daySales = salesData.filter(sale => {
       if (!sale.date) return false;
-
       const saleDate = new Date(sale.date);
-
       return (
         saleDate.getFullYear() === year &&
         saleDate.getMonth() === month &&
@@ -132,611 +114,195 @@ document.addEventListener('DOMContentLoaded', async function() {
     let serviceMargin = 0;
 
     daySales.forEach(sale => {
-
       const unitPrice = sale.unitPrice || 0;
       const purchasePrice = sale.purchasePrice || 0;
       const quantity = sale.quantity || 1;
-
       const margin = (unitPrice - purchasePrice) * quantity;
-
       if (sale.category === "service") {
         serviceMargin += margin;
       } else {
         productMargin += margin;
       }
-
     });
 
-    return {
-      product: productMargin,
-      service: serviceMargin,
-      total: productMargin + serviceMargin
-    };
+    return { product: productMargin, service: serviceMargin, total: productMargin + serviceMargin };
   }
 
-  // Solde cumulé à la fin de la veille de `date` (cache hebdomadaire du lundi précédent + jours restants)
-  function getBalanceBefore(date) {
-    const monday = new Date(date);
-    monday.setHours(0, 0, 0, 0);
-    monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
-    const prevKey = formatDateKey(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() - 7));
-    let balance = weeklyFinalBalances[prevKey] || 0;
-    const stop = new Date(date);
-    stop.setHours(0, 0, 0, 0);
-    for (const d = new Date(monday); d < stop; d.setDate(d.getDate() + 1)) {
-      const m = aggregatedMovements[formatDateKey(d)] || { spent: 0, disburse: 0 };
-      balance += calculateDayRevenue(d) - ((m.spent || 0) + getEffectiveDisburse(m));
-    }
-    return balance;
+  // Valeurs agrégées d'un jour (recettes / dépenses / P.Commande / marge / solde du jour)
+  function getDayData(date) {
+    const recettes = calculateDayRevenue(date);
+    const movements = aggregatedMovements[formatDateKey(date)] || { spent: 0, disburse: 0 };
+    const depenses = movements.spent || 0;
+    const disburse = getEffectiveDisburse(movements);
+    const margin = calculateDayMargin(date).total;
+    // Solde journalier : Recettes - Dépenses - P.Commande (sans report)
+    const solde = recettes - (depenses + disburse);
+    return { recettes, depenses, disburse, margin, solde };
   }
 
-  // Fonction pour mettre à jour le tableau journalier
+  // ===================================================================
+  // CALENDRIER + colonne "Total semaine"
+  // ===================================================================
 
-  function updateTreasuryTable(startDate, endDate) {
-    const tableBody = document.getElementById('treasuryTableBody');
-    if (!tableBody) return;
-    tableBody.innerHTML = '';
-
-    let totalRecettes = 0;
-    let totalDepenses = 0;
-    let totalDisburse = 0;
-    let totalSolde = 0;
-    let totalDecaissement = 0;
-    let soldeFinale = 0;
-    let totalMargin = 0;
-
-    // Report = solde cumulé de tout ce qui précède startDate (la semaine affichée peut être tronquée par le mois)
-    let initialReport = getBalanceBefore(startDate);
-    let previousDaySoldeFinal = initialReport;
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    let currentDay = new Date(startDate);
-    let daysProcessed = 0;
-
-    const lastDay = new Date(endDate);
-    lastDay.setHours(0, 0, 0, 0);
-
-    while (currentDay <= lastDay) {
-      const day = new Date(currentDay);
-      if (day > today) break;
-      if (day.getDay() === 0) { // le dimanche est exclu du tableau
-        currentDay.setDate(currentDay.getDate() + 1);
-        continue;
-      }
-
-      const marginData = calculateDayMargin(day);
-      const dayRecettes = calculateDayRevenue(day);
-      totalRecettes += dayRecettes;
-
-      const dayKey = formatDateKey(day);
-      const dayMovements = aggregatedMovements[dayKey] || { spent: 0, disburse: 0 };
-      const dayDepenses = dayMovements.spent || 0;
-      const dayDisburse = getEffectiveDisburse(dayMovements);
-      totalDepenses += dayDepenses;
-      totalDisburse += dayDisburse;
-      const dayDecaissement = dayDisburse;
-      totalDecaissement += dayDecaissement;
-      totalMargin += marginData.total;
-
-      let dayReport = previousDaySoldeFinal;
-      const daySolde = (dayReport + dayRecettes) - (dayDepenses + dayDisburse);
-      totalSolde += daySolde;
-      previousDaySoldeFinal = daySolde;
-      soldeFinale = daySolde;
-
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>${formatDateDisplay(day)}</td>
-        <td>${formatAriary(dayReport)}</td>
-        <td>${formatAriary(dayRecettes)}</td>
-        <td>${formatAriary(dayDepenses)}</td>
-        <td class="p-commande-column">${formatAriary(dayDisburse)}</td>
-        <td>${formatAriary(daySolde)}</td>
-        <td>
-          [${formatAriary(marginData.product)} + ${formatAriary(marginData.service)}]
-          = ${formatAriary(marginData.total)}
-        </td>
-      `;
-      tableBody.appendChild(row);
-
-      currentDay.setDate(currentDay.getDate() + 1);
-      daysProcessed++;
-    }
-
-    if (daysProcessed === 0) {
-      const row = document.createElement('tr');
-      row.innerHTML = `<td colspan="7" class="no-data">Aucune donnée disponible pour cette période</td>`;
-      tableBody.appendChild(row);
-    }
-
-    document.getElementById('totalTreasuryReport').textContent = formatAriary(initialReport);
-    document.getElementById('totalTreasuryRecettes').textContent = formatAriary(totalRecettes);
-    document.getElementById('totalTreasuryDepenses').textContent = formatAriary(totalDepenses);
-    document.getElementById('totalTreasuryDisburse').textContent = formatAriary(totalDisburse);
-    document.getElementById('totalTreasurySolde').textContent =
-      formatAriary(initialReport + totalRecettes - (totalDepenses + totalDisburse));
-    document.getElementById('totalTreasuryMargin').textContent = formatAriary(totalMargin);
-    updatePCommandeVisibility();
-    
-    if (document.getElementById('totalRecettes')) document.getElementById('totalRecettes').textContent = formatAriary(totalRecettes);
-    if (document.getElementById('totalDepenses')) document.getElementById('totalDepenses').textContent = formatAriary(totalDepenses);
-    if (document.getElementById('totalDisburse')) document.getElementById('totalDisburse').textContent = formatAriary(totalDisburse);
-    if (document.getElementById('totalSolde')) document.getElementById('totalSolde').textContent = formatAriary(totalSolde);
-    if (document.getElementById('totalDecaissement')) document.getElementById('totalDecaissement').textContent = formatAriary(totalDecaissement);
-    if (document.getElementById('soldeFinale')) document.getElementById('soldeFinale').textContent = formatAriary(soldeFinale);
+  function line(cls, text) {
+    return `<span class="t-line ${cls}">${text}</span>`;
   }
 
-  // Fonction pour obtenir toutes les semaines d'un mois donné (inchangée)
-  function getWeeksInMonth(year, month) {
-  const weeks = [];
+  // Bloc de lignes (recettes / dépenses / P.Com / solde / marge) d'un jour ou d'un total
+  function renderLines({ recettes, depenses, disburse, solde, margin }, excluded) {
+    let html = '';
+    html += line('recette', `+ ${formatAriary(recettes)}`);
+    html += line('depense', `- ${formatAriary(depenses)}`);
+    if (!excluded) {
+      html += `<span class="t-line pcommande p-commande-column">P.Cmd ${formatAriary(disburse)}</span>`;
+    }
+    html += `<span class="t-line solde${solde < 0 ? ' negative' : ''}">Solde ${formatAriary(solde)}</span>`;
+    html += line('marge', `Marge ${formatAriary(margin)}`);
+    return html;
+  }
 
-  const firstDayOfMonth = new Date(year, month, 1);
-  const lastDayOfMonth = new Date(year, month + 1, 0);
+  function renderCalendar() {
+    const calendarEl = document.getElementById('treasuryCalendar');
+    if (!calendarEl) return;
 
-  // On démarre au lundi de la semaine du 1er jour
-  let currentWeekStart = new Date(firstDayOfMonth);
-  const dayOfWeek = currentWeekStart.getDay();
-  const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-  currentWeekStart.setDate(currentWeekStart.getDate() - daysToSubtract);
+    const firstDay = new Date(currentYear, currentMonth, 1);
+    const lastDay = new Date(currentYear, currentMonth + 1, 0);
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const todayKey = formatDateKey(now);
+    const excluded = isPCommandeExcluded();
 
-  while (true) {
-    let currentWeekEnd = new Date(currentWeekStart);
-    currentWeekEnd.setDate(currentWeekStart.getDate() + 6);
+    // En-tête : 7 jours + colonne Total semaine
+    let html = '<div class="treasury-weekdays">';
+    weekDayNames.forEach(d => { html += `<div class="treasury-weekday">${d}</div>`; });
+    html += '<div class="treasury-weekday total">Total semaine</div>';
+    html += '</div><div class="treasury-days">';
 
-    // 🧠 CONDITION CLÉ :
-    // garder la semaine seulement si elle intersecte le mois
-    if (currentWeekEnd >= firstDayOfMonth && currentWeekStart <= lastDayOfMonth) {
+    // Construction des créneaux (cases vides avant le 1er, puis les jours, padding de fin)
+    const startOffset = (firstDay.getDay() + 6) % 7;
+    const slots = [];
+    for (let i = 0; i < startOffset; i++) slots.push(null);
+    for (let day = 1; day <= lastDay.getDate(); day++) slots.push(day);
+    while (slots.length % 7 !== 0) slots.push(null);
 
-      let start = new Date(currentWeekStart);
-      let end = new Date(currentWeekEnd);
+    for (let w = 0; w < slots.length / 7; w++) {
+      const week = slots.slice(w * 7, w * 7 + 7);
+      const weekTotal = { recettes: 0, depenses: 0, disburse: 0, solde: 0, margin: 0 };
+      let weekHasData = false;
+      let cells = '';
 
-      // 🔥 on coupe pour rester dans le mois
-      if (start < firstDayOfMonth) start = new Date(firstDayOfMonth);
-      if (end > lastDayOfMonth) end = new Date(lastDayOfMonth);
+      week.forEach(day => {
+        if (day == null) { cells += '<div class="treasury-day empty"></div>'; return; }
+        const date = new Date(currentYear, currentMonth, day);
+        const key = formatDateKey(date);
+        const isFuture = date > now;
+        const classes = ['treasury-day'];
+        if (key === todayKey) classes.push('today');
+        if (isFuture) classes.push('future');
 
-      weeks.push({ start, end });
+        let lines = '';
+        if (!isFuture) {
+          const d = getDayData(date);
+          if (d.recettes || d.depenses || d.disburse || d.margin) { classes.push('has-data'); weekHasData = true; }
+          weekTotal.recettes += d.recettes;
+          weekTotal.depenses += d.depenses;
+          weekTotal.disburse += d.disburse;
+          weekTotal.solde += d.solde;
+          weekTotal.margin += d.margin;
+          lines = renderLines(d, excluded);
+        }
+        cells += `
+          <div class="${classes.join(' ')}">
+            <span class="treasury-day-number">${day}</span>
+            <div class="treasury-day-lines">${lines}</div>
+          </div>`;
+      });
+
+      // Colonne total de la semaine
+      cells += `
+        <div class="treasury-day treasury-week-total${weekHasData ? ' has-data' : ''}">
+          <span class="treasury-day-number">Σ Semaine</span>
+          <div class="treasury-day-lines">${renderLines(weekTotal, excluded)}</div>
+        </div>`;
+
+      html += cells;
+    }
+    html += '</div>';
+    calendarEl.innerHTML = html;
+
+    updateMonthKPI();
+  }
+
+  // ===================================================================
+  // KPI du mois affiché
+  // ===================================================================
+  function setKPI(id, value, markNegative) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = formatAriary(value);
+    if (markNegative) el.classList.toggle('negative', value < 0);
+  }
+
+  function updateMonthKPI() {
+    const firstDay = new Date(currentYear, currentMonth, 1);
+    const lastDay = new Date(currentYear, currentMonth + 1, 0);
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    // Report = solde final du mois M-1 : cumul de (Recettes - Dépenses), hors P.Commande,
+    // depuis la 1ère transaction jusqu'à la veille du 1er du mois affiché.
+    let report = 0;
+    const start = findEarliestDate();
+    for (const d = new Date(start); d < firstDay; d.setDate(d.getDate() + 1)) {
+      const m = aggregatedMovements[formatDateKey(d)] || { spent: 0 };
+      report += calculateDayRevenue(d) - (m.spent || 0);
     }
 
-    currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+    // Totaux du mois affiché (jusqu'à aujourd'hui inclus)
+    let mRecettes = 0, mDepenses = 0, mDisburse = 0, mMargin = 0;
+    for (let day = 1; day <= lastDay.getDate(); day++) {
+      const date = new Date(currentYear, currentMonth, day);
+      if (date > now) break;
+      const d = getDayData(date);
+      mRecettes += d.recettes;
+      mDepenses += d.depenses;
+      mDisburse += d.disburse;
+      mMargin += d.margin;
+    }
 
-    if (currentWeekStart > lastDayOfMonth) break;
+    setKPI('kpiReport', report, true);
+    setKPI('kpiRecettes', mRecettes);
+    setKPI('kpiDepenses', mDepenses);
+    setKPI('kpiPCommande', mDisburse);
+    setKPI('kpiMargin', mMargin);
   }
 
-  return weeks;
-}
-
-  // Fonctions utilitaires (inchangées)
-  function addOption(selectElement, value, text) {
-    const option = document.createElement('option');
-    option.value = value;
-    option.textContent = text;
-    selectElement.appendChild(option);
-  }
-  
+  // ===================================================================
+  // Navigation / titre
+  // ===================================================================
   function updateMonthDisplay() {
-    const monthNames = [
-      'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-      'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
-    ];
     document.getElementById('currentMonthDisplay').textContent =
       `${monthNames[currentMonth]} ${currentYear}`;
     updateNavigationButtons();
   }
-  
+
   function updateNavigationButtons() {
     const nextMonthButton = document.getElementById('nextMonth');
     const now = new Date();
-    const currentSystemYear = now.getFullYear();
-    const currentSystemMonth = now.getMonth();
-    if (currentYear > currentSystemYear || (currentYear === currentSystemYear && currentMonth >= currentSystemMonth)) {
-      nextMonthButton.disabled = true;
-      nextMonthButton.classList.add('disabled');
-    } else {
-      nextMonthButton.disabled = false;
-      nextMonthButton.classList.remove('disabled');
-    }
+    const beyond = currentYear > now.getFullYear() ||
+      (currentYear === now.getFullYear() && currentMonth >= now.getMonth());
+    nextMonthButton.disabled = beyond;
+    nextMonthButton.classList.toggle('disabled', beyond);
   }
 
-  // Fonction pour mettre à jour les options de semaine (inchangée)
-  function updateWeekOptions() {
-    const weekSelector = document.getElementById('weekSelector');
-    weekSelector.innerHTML = '';
-    const weeks = getWeeksInMonth(currentYear, currentMonth);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const availableWeeks = weeks.filter(week => {
-      const weekStart = new Date(week.start);
-      weekStart.setHours(0,0,0,0);
-      // une semaine réduite au seul dimanche n'aurait aucune ligne (dimanche exclu)
-      const onlySunday = weekStart.getDay() === 0 && week.end.getTime() === week.start.getTime();
-      return weekStart <= today && !onlySunday;
-    });
-
-    availableWeeks.forEach((week, index) => {
-      const weekNum = String(index + 1).padStart(2, '0');
-      const startDate = formatDate(week.start);
-      const endDate = formatDate(week.end);
-      const weekText = `Semaine ${weekNum} - [${startDate} - ${endDate}]`;
-      addOption(weekSelector, `week${index + 1}`, weekText);
-    });
-
-    if (weekSelector.options.length > 0) {
-      const currentWeekIndex = findCurrentWeekIndex(availableWeeks);
-      weekSelector.selectedIndex = currentWeekIndex >= 0 ?
-        currentWeekIndex : availableWeeks.length - 1;
-    }
-  }
-
-  // Fonctions utilitaires (inchangées)
-  function findCurrentWeekIndex(weeks) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    for (let i = 0; i < weeks.length; i++) {
-      if (today >= weeks[i].start && today <= weeks[i].end) {
-        return i;
-      }
-    }
-    return -1;
-  }
-
-  function formatDate(date) {
-    const monthNames = [
-      'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-      'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
-    ];
-    return `${date.getDate()} ${monthNames[date.getMonth()]}`;
-  }
-
-  // Fonction pour mettre à jour le titre (inchangée)
-  function updateTitle(isRecapMode) {
-    const monthNames = [
-      'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-      'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
-    ];
-    if (isRecapMode) {
-      document.getElementById('treasuryDateTitle').textContent =
-        `Récapitulation Trésorerie - ${monthNames[currentMonth]} ${currentYear}`;
-    } else {
-      const weekSelector = document.getElementById('weekSelector');
-      if (weekSelector && weekSelector.selectedIndex >= 0) {
-        const selectedWeek = weekSelector.options[weekSelector.selectedIndex].text;
-        const parts = selectedWeek.split(' - ');
-        const dateRange = parts[1].trim() + ' - ' + parts[2].trim();
-        document.getElementById('treasuryDateTitle').textContent = `Trésorerie du : ${dateRange}`;
-      } else {
-        document.getElementById('treasuryDateTitle').textContent = `Trésorerie - ${monthNames[currentMonth]} ${currentYear}`;
-      }
-    }
-  }
-
-  // Fonction pour générer le récapitulatif mensuel (MODIFIÉE - non-async)
-  function generateMonthlySummary(year, month) {
-  try {
-    const weeks = getWeeksInMonth(year, month);
-    const summaryTableBody = document.getElementById('treasurySummaryTableBody');
-    summaryTableBody.innerHTML = '';
-
-    let totalRecettes = 0;
-    let totalDepenses = 0;
-    let totalDisburse = 0;
-    let totalMargin = 0;
-
-    let firstWeekReport = 0;
-
-    for (let i = 0; i < weeks.length; i++) {
-      const week = weeks[i];
-      const weekNum = String(i + 1).padStart(2, '0');
-
-      let weekRecettes = 0;
-      let weekDepenses = 0;
-      let weekDisburse = 0;
-      let weekMargin = 0;
-
-      let currentDay = new Date(week.start);
-      let endDay = new Date(week.end);
-      endDay.setHours(23, 59, 59);
-
-      const today = new Date();
-      if (endDay > today) endDay = today;
-
-      while (currentDay <= endDay) {
-        const dayRecettes = calculateDayRevenue(currentDay);
-        const dayKey = formatDateKey(currentDay);
-        const movements = aggregatedMovements[dayKey] || { spent: 0, disburse: 0 };
-
-        weekRecettes += dayRecettes;
-        weekDepenses += movements.spent || 0;
-        weekDisburse += getEffectiveDisburse(movements);
-        weekMargin += calculateDayMargin(currentDay).total;
-
-        currentDay.setDate(currentDay.getDate() + 1);
-      }
-
-      // 🔥 REPORT UNIQUEMENT POUR LA PREMIERE SEMAINE
-      let report = 0;
-
-      if (i === 0) {
-        const previousWeekEndDate = new Date(week.start);
-        previousWeekEndDate.setDate(previousWeekEndDate.getDate() - 1);
-
-        const previousWeekStartKey = formatDateKey(
-          new Date(previousWeekEndDate.getTime() - 6 * 24 * 60 * 60 * 1000)
-        );
-
-        report = weeklyFinalBalances[previousWeekStartKey] || 0;
-        firstWeekReport = report;
-      }
-
-      // 🔥 SOLDE SEMAINE (logique corrigée)
-      const solde = report + weekRecettes - (weekDepenses + weekDisburse);
-
-      totalRecettes += weekRecettes;
-      totalDepenses += weekDepenses;
-      totalDisburse += weekDisburse;
-      totalMargin += weekMargin;
-
-      let colorSolde = solde < 0 ? '#e74c3c' : '#27ae60';
-
-      const row = document.createElement('tr');
-
-      row.innerHTML = `
-        <td>Semaine ${weekNum}</td>
-        <td>${i === 0 ? formatAriary(report) : '-'}</td>
-        <td>${formatAriary(weekRecettes)}</td>
-        <td>${formatAriary(weekDepenses)}</td>
-        <td class="p-commande-column">${formatAriary(weekDisburse)}</td>
-        <td style="color:${colorSolde}">${formatAriary(solde)}</td>
-        <td>${formatAriary(weekMargin)}</td>
-      `;
-
-      summaryTableBody.appendChild(row);
-    }
-
-    // 🔥 TOTAL FINAL CORRECT
-    const totalSolde = firstWeekReport + totalRecettes - (totalDepenses + totalDisburse);
-
-    document.getElementById('recapReport').textContent = formatAriary(firstWeekReport);
-    document.getElementById('totalRecapRecettes').textContent = formatAriary(totalRecettes);
-    document.getElementById('totalRecapDepenses').textContent = formatAriary(totalDepenses);
-    document.getElementById('totalRecapDisburse').textContent = formatAriary(totalDisburse);
-    document.getElementById('totalRecapSolde').textContent = formatAriary(totalSolde);
-    document.getElementById('totalRecapMargin').textContent = formatAriary(totalMargin);
-
-    const totalSoldeElement = document.getElementById('totalRecapSolde');
-    totalSoldeElement.style.color = totalSolde < 0 ? '#e74c3c' : '#27ae60';
-    updatePCommandeVisibility();
-
-  } catch (error) {
-    console.error("Erreur lors de la génération du récapitulatif:", error);
-  }
-}
-
-  // Fonction pour calculer les totaux d'une semaine (MODIFIÉE - non-async)
-  function calculateWeeklySummary(startDate, endDate) {
-    let totalMargin = 0;
-    let totalRecettes = 0;
-    let totalDepenses = 0;
-    let totalDisburse = 0;
-
-    // 🔥 report uniquement pour la 1ère semaine
-    let initialReport = 0;
-
-    const previousWeekEndDate = new Date(startDate);
-    previousWeekEndDate.setDate(previousWeekEndDate.getDate() - 1);
-
-    const previousWeekStartKey = formatDateKey(
-      new Date(previousWeekEndDate.getTime() - 6 * 24 * 60 * 60 * 1000)
-    );
-
-    if (weeklyFinalBalances[previousWeekStartKey]) {
-      initialReport = weeklyFinalBalances[previousWeekStartKey];
-    }
-
-    let currentDay = new Date(startDate);
-    let endDay = new Date(endDate);
-    endDay.setHours(23, 59, 59);
-
-    const today = new Date();
-    if (endDay > today) endDay = today;
-
-    let dayIndex = 0;
-
-    while (currentDay <= endDay) {
-      const dayRecettes = calculateDayRevenue(currentDay);
-      const dayKey = formatDateKey(currentDay);
-      const dayMovements = aggregatedMovements[dayKey] || { spent: 0, disburse: 0 };
-
-      const dep = dayMovements.spent || 0;
-      const disb = getEffectiveDisburse(dayMovements);
-
-      totalRecettes += dayRecettes;
-      totalDepenses += dep;
-      totalDisburse += disb;
-
-      // 🔥 NOUVELLE LOGIQUE (comme ton tableau)
-      let dayReport = dayIndex === 0 ? initialReport : 0;
-
-      const daySolde = dayRecettes - (dep + disb) + dayReport;
-
-      totalMargin += calculateDayMargin(currentDay).total;
-
-      currentDay.setDate(currentDay.getDate() + 1);
-      dayIndex++;
-    }
-
-    // 🔥 IMPORTANT : le solde de semaine = somme logique cohérente
-    const solde = initialReport + totalRecettes - (totalDepenses + totalDisburse);
-
-    return {
-      report: initialReport,
-      recettes: totalRecettes,
-      depenses: totalDepenses,
-      disburse: totalDisburse,
-      solde: solde,
-      margin: totalMargin
-    };
+  function updateTitle() {
+    document.getElementById('treasuryDateTitle').textContent =
+      `Trésorerie - ${monthNames[currentMonth]} ${currentYear}`;
   }
 
   // ===================================================================
-  // NOUVELLE FONCTION DE PRÉ-CALCUL GLOBAL
+  // Mouvements financiers (agrégés par date et type)
   // ===================================================================
-  /**
-   * Pré-calcule les soldes finaux de TOUTES les semaines depuis 
-   * la date de début jusqu'à la date de fin (aujourd'hui).
-   */
-  function preCalculateEntireHistory(startDate, endDate) {
-    console.log(`Pré-calcul de l'historique complet de ${formatDateDisplay(startDate)} à ${formatDateDisplay(endDate)}`);
-    
-    let currentWeekStart = new Date(startDate);
-    
-    while (currentWeekStart <= endDate) {
-      const currentWeekEnd = new Date(currentWeekStart);
-      currentWeekEnd.setDate(currentWeekStart.getDate() + 6);
-
-      // Appelle la fonction synchrone
-      const summary = calculateWeeklySummary(currentWeekStart, currentWeekEnd);
-      
-      // Stocke le résultat dans le cache
-      const weekStartKey = formatDateKey(currentWeekStart);
-      weeklyFinalBalances[weekStartKey] = summary.solde;
-      
-      // Avancer à la semaine suivante
-      currentWeekStart.setDate(currentWeekStart.getDate() + 7);
-    }
-    console.log("Pré-calcul de tout l'historique terminé.");
-  }
-
-  // ===================================================================
-  // GESTIONNAIRES D'ÉVÉNEMENTS (Simplifiés)
-  // ===================================================================
-
-  // N'a plus besoin d'être 'async'
-  document.getElementById('prevMonth').addEventListener('click', function() {
-    currentMonth--;
-    if (currentMonth < 0) {
-      currentMonth = 11;
-      currentYear--;
-    }
-    updateMonthDisplay();
-    updateWeekOptions();
-
-    // *** SUPPRIMÉ : Plus besoin de pré-calculer ici ***
-
-    if (document.getElementById('recapSwitch').checked) {
-      generateMonthlySummary(currentYear, currentMonth); // Lit le cache
-    } else {
-      const weekSelector = document.getElementById('weekSelector');
-      if (weekSelector.options.length > 0) {
-        weekSelector.selectedIndex = weekSelector.options.length - 1; // Select last available week
-        weekSelector.dispatchEvent(new Event('change'));
-      } else {
-        document.getElementById('treasuryTableBody').innerHTML = '<tr><td colspan="7" class="no-data">Aucune donnée pour ce mois</td></tr>';
-        updateTitle(false);
-      }
-    }
-  });
-
-  // N'a plus besoin d'être 'async'
-  document.getElementById('nextMonth').addEventListener('click', function() {
-    if (this.disabled) return;
-    currentMonth++;
-    if (currentMonth > 11) {
-      currentMonth = 0;
-      currentYear++;
-    }
-    updateMonthDisplay();
-    updateWeekOptions();
-
-    // *** SUPPRIMÉ : Plus besoin de pré-calculer ici ***
-
-    if (document.getElementById('recapSwitch').checked) {
-      generateMonthlySummary(currentYear, currentMonth); // Lit le cache
-    } else {
-      const weekSelector = document.getElementById('weekSelector');
-      if (weekSelector.options.length > 0) {
-        weekSelector.selectedIndex = 0; // Select first week of new month
-        weekSelector.dispatchEvent(new Event('change'));
-      } else {
-        document.getElementById('treasuryTableBody').innerHTML = '<tr><td colspan="7" class="no-data">Aucune donnée pour ce mois</td></tr>';
-        updateTitle(false);
-      }
-    }
-  });
-
-  // N'a plus besoin d'être 'async'
-  document.getElementById('recapSwitch').addEventListener('change', function() {
-    const isRecapMode = this.checked;
-    document.getElementById('detailedView').style.display = isRecapMode ? 'none' : '';
-    document.getElementById('summaryView').style.display = isRecapMode ? '' : 'none';
-    document.getElementById('weekSelector').style.display = isRecapMode ? 'none' : '';
-    updateTitle(isRecapMode);
-    
-    if (isRecapMode) {
-      generateMonthlySummary(currentYear, currentMonth); // Lit le cache
-    } else {
-      // Re-déclenche l'affichage de la semaine sélectionnée
-      const weekSelector = document.getElementById('weekSelector');
-      if (weekSelector.options.length > 0) {
-        weekSelector.dispatchEvent(new Event('change'));
-      } else {
-        document.getElementById('treasuryTableBody').innerHTML = '<tr><td colspan="7" class="no-data">Aucune donnée pour ce mois</td></tr>';
-        updateTitle(false);
-      }
-    }
-  });
-
-  document.getElementById('excludePCommandeSwitch').addEventListener('change', function() {
-    weeklyFinalBalances = {};
-    const earliestDate = findEarliestDate();
-    const today = new Date();
-    today.setHours(23, 59, 59, 999);
-    preCalculateEntireHistory(earliestDate, today);
-    updatePCommandeVisibility();
-
-    if (document.getElementById('recapSwitch').checked) {
-      generateMonthlySummary(currentYear, currentMonth);
-    } else {
-      const weekSelector = document.getElementById('weekSelector');
-      if (weekSelector.selectedIndex >= 0) {
-        weekSelector.dispatchEvent(new Event('change'));
-      }
-    }
-  });
-
-  // Inchangé, lit le cache
-  document.getElementById('weekSelector').addEventListener('change', function() {
-    if (this.selectedIndex < 0) return;
-
-    const selectedWeekText = this.options[this.selectedIndex].text;
-    const match = selectedWeekText.match(/\[(.*?)\]/);
-    if (!match) return;
-
-    const [startStr, endStr] = match[1].split(' - ');
-    const monthNames = [
-      'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-      'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
-    ];
-
-    const startDay = parseInt(startStr.split(' ')[0]);
-    const startMonth = monthNames.findIndex(m => m === startStr.split(' ')[1]);
-    const endDay = parseInt(endStr.split(' ')[0]);
-    const endMonth = monthNames.findIndex(m => m === endStr.split(' ')[1]);
-
-    const startDate = new Date(currentYear, startMonth, startDay);
-    const endDate = new Date(currentYear, endMonth, endDay);
-    
-    if(startMonth === 11 && endMonth === 0) endDate.setFullYear(currentYear + 1);
-
-    updateTitle(false);
-    updateTreasuryTable(startDate, endDate); // Lit le cache
-  });
-
-  /**
-   * Récupère et agrège les mouvements financiers par date et type (inchangé)
-   */
   async function getAggregatedMovements() {
     try {
       const response = await fetch('/api/movements');
@@ -762,38 +328,37 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 
   // ===================================================================
-  // INITIALISATION (Modifiée)
+  // Gestionnaires d'événements
   // ===================================================================
-  
-  // N'a plus besoin d'être 'async'
-  function initializePage() {
-    // *** AJOUT : Trouver la date de début ***
-    const earliestDate = findEarliestDate();
-    const today = new Date();
-    today.setHours(23, 59, 59, 999); // S'assurer qu'on inclut aujourd'hui
-
-    // *** MODIFIÉ : Lancer le pré-calcul complet ***
-    // Les données (salesData, aggregatedMovements) sont déjà chargées
-    preCalculateEntireHistory(earliestDate, today);
-
-    // Le reste est inchangé
+  function refresh() {
     updateMonthDisplay();
-    updateWeekOptions();
-    updatePCommandeVisibility();
-
-    const weekSelector = document.getElementById('weekSelector');
-
-    if (weekSelector.options.length > 0) {
-      weekSelector.dispatchEvent(new Event('change'));
-    } else {
-      const tableBody = document.getElementById('treasuryTableBody');
-      if (tableBody) {
-        tableBody.innerHTML = '<tr><td colspan="7" class="no-data">Aucune donnée disponible pour ce mois</td></tr>';
-      }
-      updateTitle(false);
-    }
+    updateTitle();
+    renderCalendar();
   }
 
-  // Lancer l'initialisation (après les 'await' initiaux)
-  initializePage();
+  document.getElementById('prevMonth').addEventListener('click', function() {
+    currentMonth--;
+    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+    refresh();
+  });
+
+  document.getElementById('nextMonth').addEventListener('click', function() {
+    if (this.disabled) return;
+    currentMonth++;
+    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+    refresh();
+  });
+
+  document.getElementById('excludePCommandeSwitch').addEventListener('change', function() {
+    updatePCommandeVisibility();
+    renderCalendar();
+  });
+
+  // ===================================================================
+  // Initialisation
+  // ===================================================================
+  updateMonthDisplay();
+  updateTitle();
+  updatePCommandeVisibility();
+  renderCalendar();
 });

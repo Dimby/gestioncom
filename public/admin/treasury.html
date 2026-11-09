@@ -20,16 +20,6 @@
             <span id="currentMonthDisplay"></span>
             <button id="nextMonth" class="month-nav-btn">&gt;</button>
           </div>
-          <select id="weekSelector" class="week-selector">
-            <!-- Options seront générées dynamiquement en JavaScript -->
-          </select>
-          <div class="recap-filter" style="display:flex; align-items:center; margin-left:20px;">
-            <label class="switch">
-              <input type="checkbox" id="recapSwitch">
-              <span class="slider round"></span>
-            </label>
-            <span style="margin-left:10px;">Récapitulation</span>
-          </div>
           <div class="recap-filter" style="display:flex; align-items:center; margin-left:20px;">
             <label class="switch">
               <input type="checkbox" id="excludePCommandeSwitch">
@@ -41,68 +31,33 @@
       </div>
       
       <div class="container">
-        <!-- Tableau détaillé journalier (existant) -->
-        <div id="detailedView">
-          <table id="treasuryTable">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Report</th>
-                <th>Recettes</th>
-                <th>Dépenses</th>
-                <th class="p-commande-column">P.Commande</th>
-                <th>Solde</th>
-                <th>Marge brute [P+S]</th>
-              </tr>
-            </thead>
-            <tbody id="treasuryTableBody">
-              <!-- Les données seront générées dynamiquement ici -->
-            </tbody>
-            <tfoot>
-              <tr>
-                <td>Total</td>
-                <td id="totalTreasuryReport">0 Ar</td>
-                <td id="totalTreasuryRecettes">0 Ar</td>
-                <td id="totalTreasuryDepenses">0 Ar</td>
-                <td id="totalTreasuryDisburse" class="p-commande-column">0 Ar</td>
-                <td id="totalTreasurySolde">0 Ar</td>
-                <td id="totalTreasuryMargin">0 Ar</td>
-              </tr>
-            </tfoot>
-          </table>
+        <!-- Vue calendrier mensuel -->
+        <div id="calendarView">
+          <!-- Bandeau KPI : totaux du mois affiché -->
+          <div class="treasury-kpis">
+            <div class="treasury-kpi">
+              <span class="treasury-kpi-label">Report (fin mois précédent)</span>
+              <span class="treasury-kpi-value" id="kpiReport">0 Ar</span>
+            </div>
+            <div class="treasury-kpi">
+              <span class="treasury-kpi-label">Recettes du mois</span>
+              <span class="treasury-kpi-value" id="kpiRecettes">0 Ar</span>
+            </div>
+            <div class="treasury-kpi">
+              <span class="treasury-kpi-label">Dépenses du mois</span>
+              <span class="treasury-kpi-value" id="kpiDepenses">0 Ar</span>
+            </div>
+            <div class="treasury-kpi p-commande-column">
+              <span class="treasury-kpi-label">P.Commande du mois</span>
+              <span class="treasury-kpi-value" id="kpiPCommande">0 Ar</span>
+            </div>
+            <div class="treasury-kpi">
+              <span class="treasury-kpi-label">Marge brute du mois</span>
+              <span class="treasury-kpi-value" id="kpiMargin">0 Ar</span>
+            </div>
+          </div>
+          <div class="treasury-calendar" id="treasuryCalendar"></div>
         </div>
-        
-        <!-- Nouveau tableau récapitulatif par semaine -->
-        <div id="summaryView" style="display:none;">
-          <table id="treasurySummaryTable">
-            <thead>
-              <tr>
-                <th>Semaine</th>
-                <th>Report</th>
-                <th>Recettes</th>
-                <th>Dépenses</th>
-                <th class="p-commande-column">P.Commande</th>
-                <th>Solde</th>
-                <th>Marge brute</th>
-              </tr>
-            </thead>
-            <tbody id="treasurySummaryTableBody">
-              <!-- Les données de récapitulation seront générées dynamiquement -->
-            </tbody>
-            <tfoot>
-              <tr>
-                <td>Total</td>
-                <td id="recapReport">-</td>
-                <td id="totalRecapRecettes">0 Ar</td>
-                <td id="totalRecapDepenses">0 Ar</td>
-                <td id="totalRecapDisburse" class="p-commande-column">0 Ar</td>
-                <td id="totalRecapSolde">0 Ar</td>
-                <td id="totalRecapMargin">0 Ar</td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-
       </div>
     </div>
   </div>
